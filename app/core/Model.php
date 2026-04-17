@@ -12,6 +12,7 @@ class Model
      * Database instance
      */
     protected $db;
+    
 
     /**
      * Table name
@@ -38,8 +39,9 @@ class Model
      */
     public function __construct($data = [])
     {
-        $this->db = new Database();
+        $this->db = Database::getInstance();
         $this->fill($data);
+        
     }
 
     /**
