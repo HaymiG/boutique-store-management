@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Serve existing files and directories directly
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Route all other requests to index.php
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Prevent direct access to PHP files except index.php
+<FilesMatch "\.php$">
+    <If "%{REQUEST_URI} !~ m#^/public/index\.php$#">
+        # Allow index.php only
+    </If>
+</FilesMatch>
