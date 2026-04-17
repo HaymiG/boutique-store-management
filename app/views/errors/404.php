@@ -1,3 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Not Found | Boutique Store</title>
+    <link rel="stylesheet" href="/frontend/css/base.css">
+    <style>
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            text-align: center;
+        }
+        .error-card {
+            max-width: 480px;
+            padding: var(--space-2xl);
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        }
+        .error-code {
+            font-size: 6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            line-height: 1;
+            margin-bottom: var(--space-sm);
+            letter-spacing: -0.04em;
+        }
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            color: var(--text-primary);
+        }
+        .error-message {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: var(--space-xl);
+        }
+        .error-actions {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-card">
+            <div class="error-code">404</div>
+            <h1 class="error-title">Page Not Found</h1>
+            <p class="error-message">
+                The page you're looking for doesn't exist or has been moved.
+            </p>
+            <div class="error-actions">
+                <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+                <a href="/" class="btn btn-outline">Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
 <?php
 
 /**
