@@ -49,7 +49,7 @@ class DashboardController extends Controller
         // Today's revenue
         $result = $db->query(
             "SELECT COALESCE(SUM(final_amount), 0) as total 
-             FROM sales WHERE DATE(created_at) = CURDATE()"
+            FROM sales WHERE DATE(created_at) = CURDATE()"
         );
         $row = $result->fetch_assoc();
         $stats['today_revenue'] = $row['total'];
@@ -73,8 +73,8 @@ class DashboardController extends Controller
             // Low stock alerts
             $result = $db->query(
                 "SELECT COUNT(*) as count FROM stock s 
-                 JOIN items i ON s.item_id = i.id 
-                 WHERE s.quantity <= i.reorder_level AND i.is_active = 1"
+                JOIN items i ON s.item_id = i.id 
+                WHERE s.quantity <= i.reorder_level AND i.is_active = 1"
             );
             $row = $result->fetch_assoc();
             $stats['low_stock_count'] = $row['count'];
@@ -89,9 +89,9 @@ class DashboardController extends Controller
     private function getRecentSales($db, $role)
     {
         $query = "SELECT s.*, u.first_name, u.last_name, b.name as branch_name 
-                  FROM sales s
-                  JOIN users u ON s.user_id = u.id
-                  JOIN branches b ON s.branch_id = b.id";
+                FROM sales s
+                JOIN users u ON s.user_id = u.id
+                JOIN branches b ON s.branch_id = b.id";
 
         $params = [];
 
