@@ -4,32 +4,50 @@
  * Main Application Entry Point
  */
 
-// Define base path constants
-if (!defined('APP_PATH')) {
-    define('APP_PATH', dirname(__DIR__) . '/app');
-    define('CONFIG_PATH', dirname(__DIR__) . '/config');
-    define('STORAGE_PATH', dirname(__DIR__) . '/storage');
-    define('PUBLIC_PATH', __DIR__);
-    define('FRONTEND_PATH', dirname(__DIR__) . '/frontend');
-    define('ROOT_PATH', dirname(__DIR__));
-}
-
-// Load bootstrap with simplified setup
-require_once ROOT_PATH . '/bootstrap.php';
+// Load bootstrap which defines all path constants
+require_once dirname(__DIR__) . '/bootstrap.php';
 
 use App\Core\Router;
 use App\Core\Database;
 
-// Set up error handling
+// Set up error handling (display errors in debug mode)
+if (APP_DEBUG) {
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
+}
+
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
     log_message("PHP Error [$errno]: $errstr in $errfile on line $errline", 'error');
     if (in_array($errno, [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
         http_response_code(500);
-        include APP_PATH . '/views/errors/500.php';
+        if (APP_DEBUG) {
+            echo "PHP Error [$errno]: $errstr in $errfile on line $errline";
+        } else {
+            include APP_PATH . '/views/errors/500.php';
+        }
         exit;
     }
     return true;
 });
+
+// Configure CORS for API requests
+if (CORS_ENABLED) {
+    header('Access-Control-Allow-Origin: ' . CORS_ORIGIN);
+    header('Access-Control-Allow-Methods: ' . CORS_ALLOWED_METHODS);
+    header('Access-Control-Allow-Headers: ' . CORS_ALLOWED_HEADERS);
+    header('Access-Control-Allow-Credentials: true');
+    
+    // Handle preflight requests
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(200);
+        exit;
+    }
+}
+
+// Set JSON response header for API routes
+if (strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') === 0) {
+    header('Content-Type: application/json');
+}
 
 // Set up exception handling
 set_exception_handler(function($exception) {
@@ -43,10 +61,24 @@ set_exception_handler(function($exception) {
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'error' => $exception->getMessage()
+            'error' => $exception->getMessage(),
+            'debug' => APP_DEBUG ? [
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'trace' => $exception->getTraceAsString()
+            ] : null
         ]);
     } else {
-        include APP_PATH . '/views/errors/500.php';
+        if (APP_DEBUG) {
+            echo "<pre>";
+            echo "Exception: " . $exception->getMessage() . "\n";
+            echo "File: " . $exception->getFile() . "\n";
+            echo "Line: " . $exception->getLine() . "\n";
+            echo "Trace:\n" . $exception->getTraceAsString();
+            echo "</pre>";
+        } else {
+            include APP_PATH . '/views/errors/500.php';
+        }
     }
     exit;
 });

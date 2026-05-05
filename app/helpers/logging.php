@@ -32,3 +32,41 @@ if (!function_exists('log_message')) {
         return @file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
     }
 }
+
+// Simple Logger class wrapper
+if (!class_exists('Logger')) {
+    class Logger
+    {
+        public function info($message)
+        {
+            return log_message($message, 'info');
+        }
+
+        public function error($message)
+        {
+            return log_message($message, 'error');
+        }
+
+        public function warning($message)
+        {
+            return log_message($message, 'warning');
+        }
+
+        public function debug($message)
+        {
+            return log_message($message, 'debug');
+        }
+    }
+}
+
+// Global logger function
+if (!function_exists('logger')) {
+    function logger()
+    {
+        static $instance = null;
+        if ($instance === null) {
+            $instance = new Logger();
+        }
+        return $instance;
+    }
+}

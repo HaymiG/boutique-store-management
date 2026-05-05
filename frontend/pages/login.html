@@ -1,53 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login — Boutique Store</title>
-
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/auth.css">
+  
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/auth.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-
 <body>
-
-  <div class="authcontainer">
-    <div class="authform">
-      <div class="authheader">
-        <div class="authlogo">
-          Boutique<span class="logospan">Store</span>
+  
+  <div class="auth-container">
+    <div class="auth-form">
+      <div style="text-align:center;margin-bottom:2.5rem">
+        <div class="logo" style="margin-bottom:0.5rem;font-size:1.5rem">
+          Boutique<span style="font-weight:300;margin-left:4px">Store</span>
         </div>
-        <p class="authsubtitle">Sign in to your account</p>
+        <p style="color:var(--text-secondary);font-size:0.875rem">Sign in to your account</p>
       </div>
 
       <form id="loginForm">
-        <div class="formgroup">
-          <label class="formlabel" for="loginEmail">Email</label>
-          <input type="email" id="loginEmail" class="formcontrol" value="admin@boutique.com" required>
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" class="form-control" value="admin@boutique.com" required>
         </div>
-        <div class="formgroup">
-          <label class="formlabel" for="loginPassword">Password</label>
-          <input type="password" id="loginPassword" class="formcontrol" value="password123" required>
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" class="form-control" value="password123" required>
         </div>
-        <p id="errorMsg" class="errormsg">Invalid email or password.</p>
-
-        <button type="submit" id="loginBtn" class="loginbtn">Log in</button>
+        <p id="errorMsg" style="color:var(--danger);font-size:0.8rem;display:none;margin-bottom:1rem;text-align:center">Invalid email or password.</p>
+        
+        <button type="submit" id="loginBtn" class="btn btn-primary" style="width:100%;padding:0.875rem;font-size:0.9rem;margin-top:0.5rem">Log in</button>
       </form>
 
-      <div class="authfooter">
-        <p class="authtest">
+      <div style="text-align:center;margin-top:2.5rem;border-top:1px solid var(--border);padding-top:1.5rem">
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.6">
           Test: admin@boutique.com · store@boutique.com · seller@boutique.com<br>
           Password: password123
         </p>
-        <a href="index.html" class="authback">← Back to Homepage</a>
+        <a href="/" style="font-size:0.8rem;color:var(--text-secondary);font-weight:500">← Back to Homepage</a>
       </div>
     </div>
   </div>
 
-  <script src="../js/mockData.js"></script>
-  <script src="../js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/mockData.js"></script>
+  <script src="/js/auth.js"></script>
 </body>
-
 </html>

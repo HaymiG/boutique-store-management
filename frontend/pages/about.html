@@ -1,80 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About — Boutique Store</title>
-
+  
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/landing.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-
 <body>
-
-  <nav class="navigation" id="navbar">
-    <div class="navcontainer">
+  
+  <nav class="landing-nav" id="navbar">
+    <div class="container d-flex justify-between align-center">
       <div class="logo">
-        <a class="logolink" href="index.html">Boutique<span class="logospan">Store</span></a>
+        <a href="index.html">Boutique<span style="font-weight:300;margin-left:4px">Store</span></a>
       </div>
-      <div class="navlinks">
+      <div class="landing-nav-links d-flex align-center">
         <a href="index.html#features">Features</a>
         <a href="about.html">About</a>
-        <a href="login.html" class="navlogin">Log in</a>
+        <a href="login.html" class="btn btn-primary" style="margin-left:1.5rem">Log in</a>
       </div>
     </div>
   </nav>
 
-  <header class="pagehero">
-    <div class="pageherocontent">
-      <p class="heroeyebrow">Our Story</p>
-      <h1 class="pageherotitle">About the Boutique</h1>
-      <p class="herosubtitle">
-        Driven by aesthetics, designed for efficiency. Learn how our internal management tools power a seamless retail
-        experience across multiple boutique branches.
+  <header class="landing-hero reveal" style="min-height:60vh;background:var(--bg-secondary)">
+    <div class="hero-content" style="padding-top:4rem">
+      <p class="hero-eyebrow">Our Story</p>
+      <h1 class="hero-title" style="font-size:3rem">About the Boutique</h1>
+      <p class="hero-subtitle">
+        Driven by aesthetics, designed for efficiency. Learn how our internal management tools power a seamless retail experience across multiple boutique branches.
       </p>
     </div>
   </header>
 
-  <section class="textsection">
-    <h2 class="texttitle">The Philosophy</h2>
-    <p class="textpara">
-      We believe that the backend of fashion should be just as beautiful and inspiring as the frontend. The Boutique
-      Store Management platform was built exclusively to provide branch managers, sellers, and store keepers with an
-      intuitive, minimalist tool to track their daily retail operations.
+  <section class="container reveal" style="padding:5rem 0;max-width:720px">
+    <h2 style="font-size:1.5rem;margin-bottom:1.5rem">The Philosophy</h2>
+    <p style="color:var(--text-secondary);line-height:1.8;margin-bottom:1.5rem">
+      We believe that the backend of fashion should be just as beautiful and inspiring as the frontend. The Boutique Store Management platform was built exclusively to provide branch managers, sellers, and store keepers with an intuitive, minimalist tool to track their daily retail operations.
     </p>
-    <p class="textparalast">
-      Every feature—from adding items to point-of-sale checkout—is curated to reduce friction so you can focus on what
-      really matters: providing exceptional customer service and gorgeous clothing.
+    <p style="color:var(--text-secondary);line-height:1.8;margin-bottom:2rem">
+      Every feature—from adding items to point-of-sale checkout—is curated to reduce friction so you can focus on what really matters: providing exceptional customer service and gorgeous clothing.
     </p>
-
-    <div class="centerbtnbox">
-      <a href="login.html" class="primarybtn">Log into Dashboard</a>
+    
+    <div class="d-flex justify-center" style="margin-top:3rem">
+      <a href="login.html" class="btn btn-primary hover-lift">Log into Dashboard</a>
     </div>
   </section>
 
-  <footer class="footer">
-    <div class="footergrid">
-      <div class="footerbrand">
-        <div class="logo">Boutique<span class="logospan">Store</span></div>
+  <!-- Footer -->
+  <footer class="site-footer reveal">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <div class="logo">Boutique<span style="font-weight:300;margin-left:4px">Store</span></div>
         <p>An all-in-one internal management platform designed for modern retail boutiques.</p>
       </div>
-      <div class="footercol">
+      <div class="footer-col">
         <h4>Account</h4>
         <ul>
           <li><a href="login.html">Log In</a></li>
           <li><a href="#">Register</a></li>
         </ul>
       </div>
-      <div class="footercol">
+      <div class="footer-col">
         <h4>Company</h4>
         <ul>
           <li><a href="about.html">About</a></li>
-          <li><a href="contact.html">Contact</a></li>
+          <li><a href="#">Contact</a></li>
         </ul>
       </div>
-      <div class="footercol">
+      <div class="footer-col">
         <h4>Resources</h4>
         <ul>
           <li><a href="#">POS Guide</a></li>
@@ -82,15 +77,25 @@
         </ul>
       </div>
     </div>
-    <div class="footercontainer">
-      <div class="footerbottom">
+    <div class="container">
+      <div class="footer-bottom">
         <span>© 2026 Boutique Store</span>
         <span>All rights reserved</span>
       </div>
     </div>
   </footer>
 
-  <script src="../js/landing.js"></script>
-</body>
+  <script>
+    lucide.createIcons();
+    
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+    });
 
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('active'); observer.unobserve(e.target); }});
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
 </html>

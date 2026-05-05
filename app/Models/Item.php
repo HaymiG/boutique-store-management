@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Item Model
  */
@@ -128,4 +129,3 @@ class Item extends Model
         return $this->selling_price - $this->cost_price;
     }
 }
-?>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Router Class - Custom URL Routing System
  * Handles route matching, dispatch, and request resolution
@@ -170,10 +171,15 @@ class Router
     /**
      * Dispatch the request
      */
-    public function dispatch()
+    public function dispatch($method = null, $uri = null)
     {
-        $method = $_SERVER['REQUEST_METHOD'];
-        $uri = $this->getRequestUri();
+        if ($method === null) {
+            $method = $_SERVER['REQUEST_METHOD'];
+        }
+
+        if ($uri === null) {
+            $uri = $this->getRequestUri();
+        }
 
         // Find matching route
         $route = $this->matchRoute($method, $uri);
@@ -224,7 +230,7 @@ class Router
     {
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $basePath = dirname($_SERVER['SCRIPT_NAME']);
-        
+
         if ($basePath !== '/') {
             $uri = substr($uri, strlen($basePath));
         }
@@ -251,7 +257,7 @@ class Router
     private function executeMiddlewareClass($middleware)
     {
         $middlewarePath = APP_PATH . '/middleware/' . $middleware . '.php';
-        
+
         if (!file_exists($middlewarePath)) {
             return true; // Middleware not found, skip
         }
@@ -342,7 +348,7 @@ class Router
     private function abort($code, $message)
     {
         http_response_code($code);
-        
+
         if (APP_DEBUG) {
             die("[$code] $message");
         } else {
@@ -374,4 +380,3 @@ class Router
         return $this->currentRoute;
     }
 }
-?>

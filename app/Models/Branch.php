@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Branch Model
  */
@@ -96,4 +97,3 @@ class Branch extends Model
         return $row['count'] ?? 0;
     }
 }
-?>

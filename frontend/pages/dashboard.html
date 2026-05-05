@@ -1,305 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — Boutique Store</title>
-
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/dashboard.css">
-
+  
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-
 <body>
 
-  <div class="appwrapper">
+  <div class="app-wrapper">
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-      <div class="sidebarheader">
-        <div class="logo"><a href="index.html" class="logo">
-          Boutique<span class="logospan">Store</span>
-        </a></div>
-        <button class="mobilemenuclose" id="mobileMenuClose"><i data-lucide="x"></i></button>
+      <div class="sidebar-header d-flex justify-between align-center">
+        <div class="logo">Boutique<span style="font-weight:300;margin-left:4px">Store</span></div>
+        <button class="btn" id="mobileMenuClose" style="display:none"><i data-lucide="x"></i></button>
       </div>
 
-      <nav class="sidebarnav" id="sidebarNav"></nav>
+      <nav class="sidebar-nav" id="sidebarNav">
+        <!-- Injected by dashboard.js -->
+      </nav>
 
-      <div class="sidebarfooter">
-        <button class="passwordbtn" onclick="changePassword()">
-          <i data-lucide="key" class="navicon"></i>
-          <span>Change Password</span>
-        </button>
-        <button class="logoutbtn" onclick="logout()">
-          <i data-lucide="log-out" class="navicon"></i>
+      <div style="padding:var(--space-lg);border-top:1px solid var(--border)">
+        <button class="nav-item" onclick="logout()" style="width:100%;border:none;background:transparent;padding:0">
+          <i data-lucide="log-out" class="nav-icon"></i>
           <span>Logout</span>
         </button>
       </div>
     </aside>
 
-    <main class="maincontent">
+    <!-- Main -->
+    <main class="main-content">
+      <!-- Topbar -->
       <header class="topbar">
-        <div class="topbarleft">
-          <button class="mobilemenubtn" id="mobileMenuBtn"><i data-lucide="menu"></i></button>
-          <div class="branchname" id="activeBranchDisplay">Piassa Branch</div>
+        <div class="d-flex align-center gap-md">
+          <button class="btn" id="mobileMenuBtn" style="padding:0.5rem;display:none"><i data-lucide="menu"></i></button>
+          <div style="font-size:0.8rem;color:var(--text-secondary)" id="activeBranchDisplay">Downtown Boutique</div>
         </div>
-        <div class="topbarright">
-          <button class="searchbtn"><i data-lucide="search" class="iconsm"></i></button>
-          <div class="dividerv"></div>
-          <div class="userprofile">
-            <div class="userinfo">
-              <span class="username" id="userNameDisplay">Adem Abe</span>
-              <span class="userrole" id="userRoleDisplay">Manager</span>
+        <div class="topbar-right">
+          <button class="btn" style="padding:0"><i data-lucide="search" style="width:20px;height:20px"></i></button>
+          <div style="width:1px;height:20px;background:var(--border);margin:0 0.25rem"></div>
+          <div class="user-profile">
+            <div style="display:flex;flex-direction:column;text-align:right">
+              <span style="font-size:0.875rem;font-weight:600" id="userNameDisplay">Admin Master</span>
+              <span style="font-size:0.7rem;color:var(--text-secondary)" id="userRoleDisplay">Manager</span>
             </div>
-            <div class="avatar" id="userAvatar">AA</div>
+            <div class="avatar" id="userAvatar">AM</div>
           </div>
         </div>
       </header>
 
-      <div class="contentarea">
+      <!-- Scrollable Content -->
+      <div class="content-area">
 
-        <section id="view-overview" class="viewsection">
-          <div class="pageheader">
-            <h1 class="pagetitle">Overview</h1>
-            <p class="pagesubtitle">Current operational metrics for your branch.</p>
+        <!-- OVERVIEW -->
+        <section id="view-overview" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title">Overview</h1>
+            <p style="color:var(--text-secondary);font-size:0.875rem">Current operational metrics for your branch.</p>
           </div>
 
-          <div class="widgetgrid">
+          <div class="widget-grid">
             <div class="widget">
-              <div class="widgettitle">Today's Revenue</div>
-              <div class="widgetvalue" id="widgetRevenue">Br 0.00</div>
+              <div class="widget-title">Today's Revenue</div>
+              <div class="widget-value">$1,245</div>
             </div>
             <div class="widget">
-              <div class="widgettitle">Active Inventory</div>
-              <div class="widgetvalue" id="widgetInventory">0</div>
+              <div class="widget-title">Active Inventory</div>
+              <div class="widget-value">2,340</div>
             </div>
             <div class="widget">
-              <div class="widgettitle">Store Operations</div>
-              <div class="widgetvalue" id="widgetBranches">0 Active</div>
+              <div class="widget-title">Store Operations</div>
+              <div class="widget-value">2 Active</div>
             </div>
           </div>
 
-          <div class="datapanel">
-            <h3 class="sectiontitle">Recent Transactions</h3>
-            <div class="filterbar" id="recentSalesFilter">
-              <select class="filterselect" id="salesTimeFilter" onchange="handleTimeFilterChange()">
-                <option value="all">All Time</option>
-                <option value="daily">Today</option>
-                <option value="weekly">This Week</option>
-                <option value="monthly">This Month</option>
-                <option value="custom">Custom Range</option>
-              </select>
-              <select class="filterselect" id="salesBranchFilter" onchange="renderRecentSales()">
-                <option value="all">All Branches</option>
-              </select>
-              <select class="filterselect" id="salesSellerFilter" onchange="renderRecentSales()">
-                <option value="all">All Sellers</option>
-              </select>
-              <div class="daterange hidden" id="customDateRange">
-                <input type="date" class="dateinput" id="dateFrom" onchange="renderRecentSales()">
-                <span class="datelabel">to</span>
-                <input type="date" class="dateinput" id="dateTo" onchange="renderRecentSales()">
-              </div>
-            </div>
-            <div class="tablewrapper">
-              <table class="datatable" id="recentSalesTable">
+          <div class="data-panel">
+            <h3 style="margin-bottom:var(--space-lg);font-size:0.875rem;font-weight:600">Recent Transactions</h3>
+            <div class="table-wrapper">
+              <table id="recentSalesTable">
                 <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Ref ID</th>
-                    <th>Associate</th>
-                    <th>Location</th>
-                    <th>Value</th>
-                  </tr>
+                  <tr><th>Date</th><th>Ref ID</th><th>Associate</th><th>Location</th><th>Value</th></tr>
                 </thead>
-                <tbody></tbody>
+                <tbody><!-- Injected by dashboard.js --></tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <section id="view-inventory" class="viewsection">
-          <div class="pageheaderbar">
-            <h1 class="pagetitle">Inventory</h1>
-            <div class="headeractions">
-              <button class="additembtn hidden" id="addItemBtn">Add Item</button>
-              <button class="receivebtn hidden" id="receiveStockBtn" onclick="receiveStock()">Receive Stock</button>
-              <button class="reportbtn hidden" id="skReportBtn" onclick="generateSkReport()">Inventory Report</button>
-            </div>
+        <!-- INVENTORY -->
+        <section id="view-inventory" class="view-section">
+          <div class="page-header d-flex justify-between align-center">
+            <h1 class="page-title">Inventory</h1>
+            <button class="btn btn-primary" id="addItemBtn" style="display:none">Add Item</button>
           </div>
 
-          <div class="datapanel">
-            <div class="tablewrapper">
-              <table class="datatable" id="inventoryTable">
+          <div class="data-panel">
+            <div class="table-wrapper">
+              <table id="inventoryTable">
                 <thead>
-                  <tr>
-                    <th>SKU</th>
-                    <th>Item</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Damaged</th>
-                    <th>Status</th>
-                    <th>Branch</th>
-                  </tr>
+                  <tr><th>SKU</th><th>Item</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Branch</th></tr>
                 </thead>
-                <tbody></tbody>
+                <tbody><!-- Injected by dashboard.js --></tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <section id="view-pos" class="viewsection">
-          <div class="pageheader">
-            <h1 class="pagetitle">Point of Sale</h1>
+        <!-- POS -->
+        <section id="view-pos" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title">Point of Sale</h1>
           </div>
 
-          <div class="poscontainer">
+          <div class="pos-container">
             <div>
-              <div class="productgrid" id="posProductGrid">
+              <div class="product-grid" id="posProductGrid">
+                <!-- Injected by dashboard.js -->
               </div>
             </div>
 
-            <div class="cartpanel">
-              <h3 class="carttitle">Current Invoice</h3>
-
-              <div class="cartitems" id="cartItemsContainer">
-                <div class="cartempty">Cart is empty</div>
+            <div class="cart-panel">
+              <h3 style="margin-bottom:var(--space-lg);font-size:0.875rem;font-weight:600;border-bottom:1px solid var(--border);padding-bottom:1rem">Current Invoice</h3>
+              
+              <div class="cart-items" id="cartItemsContainer">
+                <div style="text-align:center;color:var(--text-muted);margin-top:3rem;font-size:0.875rem">Cart is empty</div>
               </div>
-
-              <div class="cartsummary">
-                <div class="cartsubtotalrow">
-                  <span class="textsec">Subtotal</span>
-                  <span id="cartSubtotal">Br 0.00</span>
+              
+              <div class="cart-summary">
+                <div class="d-flex justify-between" style="margin-bottom:0.75rem;font-size:0.875rem">
+                  <span style="color:var(--text-secondary)">Subtotal</span>
+                  <span id="cartSubtotal">$0.00</span>
                 </div>
-                <div class="discountrow hidden" id="discountRow">
-                  <span class="textsec">Discount</span>
-                  <span id="discountDisplay">0%</span>
-                </div>
-                <div class="carttotalrow">
+                <div class="d-flex justify-between" style="margin-bottom:1.5rem;font-weight:700;font-size:1.25rem">
                   <span>Total</span>
-                  <span id="cartTotal">Br 0.00</span>
+                  <span id="cartTotal">$0.00</span>
                 </div>
-                <button class="discountbtn" id="discountBtn" onclick="applyDiscount()">Apply Discount</button>
-                <button class="checkoutbtn" id="checkoutBtn" onclick="processCheckout()">
+                <button class="btn btn-primary" style="width:100%;padding:0.875rem" id="checkoutBtn" onclick="processCheckout()">
                   Finalize Transaction
                 </button>
               </div>
             </div>
           </div>
-
-          <div id="receiptModal" class="receiptmodal hidden">
-            <div class="receiptbox">
-              <div class="receiptheader">
-                <h3 class="receipttitle">Boutique Receipt</h3>
-                <button class="receiptclose" onclick="closeReceipt()">X</button>
-              </div>
-              <div class="receiptcontent" id="receiptContent"></div>
-              <div class="receiptactions">
-                <button class="printbtn" onclick="printReceipt()">Print</button>
-                <button class="receiptbtn" onclick="closeReceipt()">Done</button>
-              </div>
-            </div>
-          </div>
         </section>
 
-        <section id="view-branches" class="viewsection">
-          <div class="pageheaderbar">
-            <h1 class="pagetitle">Branches</h1>
-            <button class="actionbtn" onclick="createBranch()">Add Branch</button>
+        <!-- BRANCHES -->
+        <section id="view-branches" class="view-section">
+          <div class="page-header d-flex justify-between align-center">
+            <h1 class="page-title">Branches</h1>
+            <button class="btn btn-primary" onclick="createBranch()">Add Branch</button>
           </div>
-          <div class="datapanel">
-            <div class="tablewrapper">
-              <table class="datatable" id="branchesTable">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Manager</th>
-                    <th>Items</th>
-                    <th>Total Sales</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
+          <div class="data-panel">
+            <div class="table-wrapper">
+              <table id="branchesTable">
+                <thead><tr><th>ID</th><th>Name</th><th>Manager</th><th>Items</th><th>Actions</th></tr></thead>
+                <tbody><!-- Injected by dashboard.js --></tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <section id="view-users" class="viewsection">
-          <div class="pageheaderbar">
-            <h1 class="pagetitle">Users</h1>
-            <button class="actionbtn" onclick="createUser()">Add User</button>
+        <!-- USERS -->
+        <section id="view-users" class="view-section">
+          <div class="page-header d-flex justify-between align-center">
+            <h1 class="page-title">Users</h1>
+            <button class="btn btn-primary" onclick="createUser()">Add User</button>
           </div>
-          <div class="datapanel">
-            <div class="tablewrapper">
-              <table class="datatable" id="usersTable">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
+          <div class="data-panel">
+            <div class="table-wrapper">
+              <table id="usersTable">
+                <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody><!-- Injected by dashboard.js --></tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <section id="view-reports" class="viewsection">
-          <div class="pageheader">
-            <h1 class="pagetitle">Analytics</h1>
+        <!-- REPORTS -->
+        <section id="view-reports" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title">Analytics</h1>
           </div>
-          <div class="reportbuttons">
-            <button class="reportbtn" onclick="generateReport('daily')">Daily Sales</button>
-            <button class="reportbtn" onclick="generateReport('weekly')">Weekly Sales</button>
-            <button class="reportbtn" onclick="generateReport('monthly')">Monthly Sales</button>
-            <button class="reportbtn" onclick="generateReport('branch')">Sales by Branch</button>
-            <button class="reportbtn" onclick="generateReport('inventory')">Inventory Snapshot</button>
-            <button class="reportbtn" onclick="generateReport('profit')">Profit Analysis</button>
+          <div class="d-flex gap-md" style="margin-bottom:var(--space-lg);flex-wrap:wrap">
+            <button class="btn btn-outline" onclick="generateReport('daily')">Daily Sales</button>
+            <button class="btn btn-outline" onclick="generateReport('weekly')">Weekly Sales</button>
+            <button class="btn btn-outline" onclick="generateReport('inventory')">Inventory Snapshot</button>
           </div>
-          <div class="datapanel">
-            <h3 id="reportTitle" class="reporttitle">Report Output</h3>
-            <pre id="reportLog" class="reportbox"></pre>
+          <div class="data-panel">
+            <h3 id="reportTitle" style="margin-bottom:1rem;font-size:0.875rem;font-weight:600">Report Output</h3>
+            <pre id="reportLog" style="background:var(--bg-secondary);padding:1rem;font-size:0.8rem;overflow-x:auto;color:var(--text-secondary);border-radius:var(--radius-md)"></pre>
           </div>
         </section>
 
-        <section id="view-stock-ops" class="viewsection">
-          <div class="pageheader">
-            <h1 class="pagetitle">Alerts</h1>
+        <!-- STOCK ALERTS -->
+        <section id="view-stock-ops" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title">Alerts</h1>
           </div>
-          <div id="stockAlertsContainer"></div>
+          <div id="stockAlertsContainer">
+            <!-- Injected by dashboard.js -->
+          </div>
         </section>
 
-        <section id="view-my-sales" class="viewsection">
-          <div class="pageheader">
-            <h1 class="pagetitle">My Performance</h1>
+        <!-- MY SALES -->
+        <section id="view-my-sales" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title">My Performance</h1>
           </div>
-          <div class="datapanel">
-            <div class="filterbar" id="mySalesFilter">
-              <select class="filterselect" id="mySalesTimeFilter" onchange="renderMySales()">
-                <option value="all">All Time</option>
-                <option value="daily">Today</option>
-                <option value="weekly">This Week</option>
-                <option value="monthly">This Month</option>
-              </select>
-            </div>
-            <div class="tablewrapper">
-              <table class="datatable" id="mySalesTable">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Ref ID</th>
-                    <th>Location</th>
-                    <th>Value</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
+          <div class="data-panel">
+            <div class="table-wrapper">
+              <table id="mySalesTable">
+                <thead><tr><th>Date</th><th>Ref ID</th><th>Location</th><th>Value</th></tr></thead>
+                <tbody><!-- Injected by dashboard.js --></tbody>
               </table>
             </div>
           </div>
@@ -309,32 +223,7 @@
     </main>
   </div>
 
-  <div id="passwordModal" class="receiptmodal hidden">
-    <div class="receiptbox">
-      <div class="receiptheader">
-        <h3 class="receipttitle">Change Password</h3>
-        <button class="receiptclose" onclick="closePasswordModal()">X</button>
-      </div>
-      <div class="passwordform">
-        <div class="formgroup">
-          <label class="formlabel" for="currentPass">Current Password</label>
-          <input type="password" id="currentPass" class="formcontrol" required>
-        </div>
-        <div class="formgroup">
-          <label class="formlabel" for="newPass">New Password</label>
-          <input type="password" id="newPass" class="formcontrol" required>
-        </div>
-        <div class="formgroup">
-          <label class="formlabel" for="confirmPass">Confirm Password</label>
-          <input type="password" id="confirmPass" class="formcontrol" required>
-        </div>
-        <button class="checkoutbtn" onclick="submitPasswordChange()">Update Password</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="../js/mockData.js"></script>
-  <script src="../js/dashboard.js"></script>
+  <script src="/js/mockData.js"></script>
+  <script src="/js/dashboard.js"></script>
 </body>
-
 </html>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Sales Model
  */
@@ -110,4 +111,3 @@ class Sales extends Model
         return $result->fetch_assoc();
     }
 }
-?>

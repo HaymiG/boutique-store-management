@@ -1,4 +1,8 @@
-.authcontainer {
+/* ===================================
+   AUTH.CSS — Nike-Inspired Login Page
+   =================================== */
+
+.auth-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -6,13 +10,13 @@
   background: var(--bg-secondary);
 }
 
-.authform {
+.auth-form {
   width: 100%;
   max-width: 420px;
-  padding: 3rem;
+  padding: var(--space-2xl);
   background: var(--bg-primary);
   border-radius: var(--radius-xl);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
 }
 
 /* Responsive: Tablet */
@@ -20,7 +24,6 @@
   .auth-container {
     padding: var(--space-xl) 0;
   }
-
   .auth-form {
     max-width: 90vw;
     padding: var(--space-xl);
@@ -32,128 +35,10 @@
   .auth-container {
     padding: var(--space-lg) 0;
   }
-
   .auth-form {
     max-width: 100vw;
     padding: var(--space-md);
     border-radius: var(--radius-md);
     box-shadow: none;
   }
-}
-
-.authheader {
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-
-.authlogo {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.logospan {
-  font-weight: 300;
-  margin-left: 0.25rem;
-}
-
-.authsubtitle {
-  color: var(--text-secondary);
-  font-size: 1rem;
-}
-
-.formgroup {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1.5rem;
-}
-
-.formlabel {
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-}
-
-.formcontrol {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 1rem;
-  transition: border-color var(--transition-fast);
-}
-
-.formcontrol:focus {
-  outline: none;
-  border-color: var(--text-primary);
-}
-
-.formcontrol.inputerror {
-  border-color: var(--danger);
-}
-
-.errormsg {
-  color: var(--danger);
-  font-size: 0.875rem;
-  text-align: center;
-  margin-bottom: 1rem;
-  display: none;
-}
-
-.errormsg.visible {
-  display: block;
-}
-
-.loginbtn {
-  width: 100%;
-  padding: 1rem;
-  background: var(--text-primary);
-  color: var(--bg-primary);
-  border: none;
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity var(--transition-fast), background var(--transition-fast);
-  margin-top: 0.5rem;
-}
-
-.loginbtn:hover {
-  opacity: 0.9;
-}
-
-.authfooter {
-  text-align: center;
-  margin-top: 2rem;
-  border-top: 1px solid var(--border);
-  padding-top: 1.5rem;
-}
-
-.authtest {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.authback {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-.authback:hover {
-  color: var(--text-primary);
-}
-
-.btnloading {
-  opacity: 0.6;
-}
-
-.btnsuccess {
-  background: var(--success);
 }

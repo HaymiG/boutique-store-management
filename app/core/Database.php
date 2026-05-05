@@ -71,7 +71,8 @@ class Database
      */
     private function connect()
     {
-        $this->connection = new \mysqli(
+        // Set connection timeout to avoid hanging
+        $this->connection = @new \mysqli(
             $this->config['host'],
             $this->config['user'],
             $this->config['password'],
@@ -107,10 +108,16 @@ class Database
             throw new \Exception('Query preparation failed: ' . $this->connection->error);
         }
 
-        // Bind parameters
+        // Bind parameters safely
         if (!empty($params)) {
             $types = $this->getParamTypes($params);
-            $stmt->bind_param($types, ...$params);
+            // Use call_user_func_array for safer binding with many parameters
+            $paramRefs = [];
+            $paramRefs[] = &$types;
+            foreach ($params as $key => &$value) {
+                $paramRefs[] = &$value;
+            }
+            call_user_func_array([$stmt, 'bind_param'], $paramRefs);
         }
 
         // Execute
@@ -227,14 +234,18 @@ class Database
 
         $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
 
-        // Manual parameter binding since mysqli doesn't support named placeholders easily
         $stmt = $this->connection->prepare($sql);
         if (!$stmt) {
             throw new \Exception('Insert preparation failed: ' . $this->connection->error);
         }
 
         $types = $this->getParamTypes(array_values($data));
-        $stmt->bind_param($types, ...array_values($data));
+        $paramRefs = [];
+        $paramRefs[] = &$types;
+        foreach (array_values($data) as $key => &$value) {
+            $paramRefs[] = &$value;
+        }
+        call_user_func_array([$stmt, 'bind_param'], $paramRefs);
 
         if (!$stmt->execute()) {
             throw new \Exception('Insert failed: ' . $stmt->error);
@@ -259,7 +270,12 @@ class Database
         }
 
         $types = $this->getParamTypes($params);
-        $stmt->bind_param($types, ...$params);
+        $paramRefs = [];
+        $paramRefs[] = &$types;
+        foreach ($params as $key => &$value) {
+            $paramRefs[] = &$value;
+        }
+        call_user_func_array([$stmt, 'bind_param'], $paramRefs);
 
         if (!$stmt->execute()) {
             throw new \Exception('Update failed: ' . $stmt->error);

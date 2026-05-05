@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Database Connection Helper
  * Loads configuration and provides utilities for database setup
@@ -9,7 +10,8 @@ $config = require __DIR__ . '/config.php';
 
 // Environment loader helper
 if (!function_exists('loadEnv')) {
-    function loadEnv($filePath) {
+    function loadEnv($filePath)
+    {
         if (!file_exists($filePath)) {
             return false;
         }
@@ -53,4 +55,3 @@ if (file_exists($envLocalFile)) {
 }
 
 return $config;
-?>

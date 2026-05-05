@@ -1,21 +1,33 @@
+/* ===================================
+   BASE.CSS — Nike-Inspired Design System
+   Ultra-clean, airy, modern retail aesthetic
+   =================================== */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
+  /* Colors — Nike-inspired: near-white bg, dark navy text, orange accent */
   --bg-primary: #ffffff;
   --bg-secondary: #f5f5f5;
   --bg-tertiary: #e5e5e5;
   --bg-dark: #111111;
+
   --text-primary: #111111;
   --text-secondary: #757575;
   --text-muted: #bcbcbc;
+
   --accent: #111111;
   --accent-hover: #333333;
   --accent-orange: #fa5400;
+
   --success: #128a2e;
   --warning: #cc7700;
   --danger: #d13b3b;
+
   --border: #e5e5e5;
   --border-strong: #111111;
+
+  /* Spacing */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -23,28 +35,29 @@
   --space-xl: 2.5rem;
   --space-2xl: 4rem;
   --space-3xl: 6rem;
+
+  /* Radius */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
+
+  /* Transitions */
   --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --transition-fast: 150ms var(--ease-out);
   --transition-normal: 300ms var(--ease-out);
   --transition-slow: 600ms var(--ease-out);
 }
 
-*,
-*::before,
-*::after {
+/* Reset */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -59,12 +72,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-family: 'Inter', sans-serif;
   font-weight: 700;
   color: var(--text-primary);
@@ -72,36 +80,20 @@ h6 {
   letter-spacing: -0.02em;
 }
 
-h1 {
-  font-size: 2.75rem;
-}
-
-h2 {
-  font-size: 2rem;
-}
-
-h3 {
-  font-size: 1.25rem;
-}
+h1 { font-size: 2.75rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.25rem; }
 
 a {
   text-decoration: none;
   color: inherit;
   transition: color var(--transition-fast);
 }
+a:hover { color: var(--text-secondary); }
 
-a:hover {
-  color: var(--text-secondary);
-}
+ul { list-style: none; }
 
-ul {
-  list-style: none;
-}
-
-input,
-button,
-select,
-textarea {
+input, button, select, textarea {
   font-family: inherit;
   font-weight: 400;
 }
@@ -112,294 +104,28 @@ button {
   background: none;
 }
 
+/* Layout */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--space-xl);
 }
 
-.d-flex {
-  display: flex;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.align-center {
-  align-items: center;
-}
-
-.flex-column {
-  flex-direction: column;
-}
-
-.flex-wrap {
-  flex-wrap: wrap;
-}
-
-.gap-sm {
-  gap: var(--space-sm);
-}
-
-.gap-md {
-  gap: var(--space-md);
-}
-
-.gap-lg {
-  gap: var(--space-lg);
-}
-
-.gap-xl {
-  gap: var(--space-xl);
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.text-gold {
-  color: var(--accent-orange) !important;
-}
-
-.text-sec {
-  color: var(--text-secondary);
-}
-
-.text-muted {
-  color: var(--text-muted);
-}
-
-.text-danger {
-  color: var(--danger);
-}
-
-.fw-300 {
-  font-weight: 300;
-}
-
-.fw-500 {
-  font-weight: 500;
-}
-
-.fw-600 {
-  font-weight: 600;
-}
-
-.fw-700 {
-  font-weight: 700;
-}
-
-.fs-xs {
-  font-size: 0.7rem;
-}
-
-.fs-sm {
-  font-size: 0.8rem;
-}
-
-.fs-md {
-  font-size: 0.875rem;
-}
-
-.fs-lg {
-  font-size: 1.25rem;
-}
-
-.fs-xl {
-  font-size: 1.5rem;
-}
-
-.fs-2xl {
-  font-size: 2.25rem;
-}
-
-.fs-3xl {
-  font-size: 3rem;
-}
-
-.mb-0 {
-  margin-bottom: 0;
-}
-
-.mb-1 {
-  margin-bottom: 0.5rem;
-}
-
-.mb-2 {
-  margin-bottom: 0.75rem;
-}
-
-.mb-3 {
-  margin-bottom: 1rem;
-}
-
-.mb-4 {
-  margin-bottom: 1.5rem;
-}
-
-.mb-5 {
-  margin-bottom: 2rem;
-}
-
-.mb-6 {
-  margin-bottom: 2.5rem;
-}
-
-.mb-8 {
-  margin-bottom: 3rem;
-}
-
-.mt-1 {
-  margin-top: 0.5rem;
-}
-
-.mt-2 {
-  margin-top: 1rem;
-}
-
-.mt-4 {
-  margin-top: 1.5rem;
-}
-
-.mt-6 {
-  margin-top: 2rem;
-}
-
-.mt-8 {
-  margin-top: 2.5rem;
-}
-
-.mt-12 {
-  margin-top: 3rem;
-}
-
-.ml-1 {
-  margin-left: 4px;
-}
-
-.ml-2 {
-  margin-left: 0.5rem;
-}
-
-.ml-4 {
-  margin-left: 1.5rem;
-}
-
-.pt-2 {
-  padding-top: 1rem;
-}
-
-.pt-4 {
-  padding-top: 1.5rem;
-}
-
-.pt-8 {
-  padding-top: 4rem;
-}
-
-.pb-2 {
-  padding-bottom: 1rem;
-}
-
-.p-0 {
-  padding: 0;
-}
-
-.p-2 {
-  padding: 0.5rem;
-}
-
-.p-3 {
-  padding: 0.875rem;
-}
-
-.p-4 {
-  padding: 1rem;
-}
-
-.px-8 {
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
-}
-
-.w-full {
-  width: 100%;
-}
-
-.h-50vh {
-  height: 50vh;
-}
-
-.h-min-40vh {
-  min-height: 40vh;
-}
-
-.h-min-60vh {
-  min-height: 60vh;
-}
-
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.max-w-460 {
-  max-width: 460px;
-}
-
-.max-w-720 {
-  max-width: 720px;
-}
-
-.lh-relaxed {
-  line-height: 1.7;
-}
-
-.lh-1-6 {
-  line-height: 1.6;
-}
-
-.pos-rel {
-  position: relative;
-}
-
-.z-2 {
-  z-index: 2;
-}
-
-.d-none {
-  display: none;
-}
-
-.bg-secondary {
-  background: var(--bg-secondary);
-}
-
-.bg-transparent {
-  background: transparent;
-}
-
-.border-none {
-  border: none;
-}
-
-.border-top {
-  border-top: 1px solid var(--border);
-}
-
-.border-bottom {
-  border-bottom: 1px solid var(--border);
-}
-
+/* Utility */
+.d-flex { display: flex; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.align-center { align-items: center; }
+.flex-column { flex-direction: column; }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+.gap-xl { gap: var(--space-xl); }
+.text-center { text-align: center; }
+
+.text-gold { color: var(--accent-orange) !important; }
+
+/* Buttons — Nike pill style */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -419,7 +145,6 @@ button {
   color: white;
   border: none;
 }
-
 .btn-primary:hover {
   background: var(--accent-hover);
 }
@@ -429,7 +154,6 @@ button {
   border: 1.5px solid var(--border);
   color: var(--text-primary);
 }
-
 .btn-outline:hover {
   border-color: var(--text-primary);
 }
@@ -439,12 +163,12 @@ button {
   color: var(--danger);
   border: 1.5px solid var(--danger);
 }
-
 .btn-danger:hover {
   background: var(--danger);
   color: white;
 }
 
+/* Forms */
 .form-group {
   margin-bottom: var(--space-lg);
   display: flex;
@@ -467,13 +191,13 @@ button {
   font-size: 0.9rem;
   transition: border-color var(--transition-fast);
 }
-
 .form-control:focus {
   outline: none;
   border-color: var(--text-primary);
   background: var(--bg-primary);
 }
 
+/* Tables */
 .table-wrapper {
   overflow-x: auto;
   background: var(--bg-primary);
@@ -486,8 +210,7 @@ table {
   text-align: left;
 }
 
-th,
-td {
+th, td {
   padding: 1rem;
   border-bottom: 1px solid var(--border);
 }
@@ -501,18 +224,12 @@ th {
   letter-spacing: 0.04em;
 }
 
-td {
-  font-size: 0.875rem;
-}
+td { font-size: 0.875rem; }
 
-tbody tr {
-  transition: background var(--transition-fast);
-}
+tbody tr { transition: background var(--transition-fast); }
+tbody tr:hover { background: var(--bg-secondary); }
 
-tbody tr:hover {
-  background: var(--bg-secondary);
-}
-
+/* Badges */
 .badge {
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-full);
@@ -520,38 +237,27 @@ tbody tr:hover {
   font-weight: 600;
   letter-spacing: 0.02em;
 }
+.badge-success { background: #e8f5e9; color: var(--success); }
+.badge-warning { background: #fff3e0; color: var(--warning); }
+.badge-danger { background: #fce4ec; color: var(--danger); }
 
-.badge-success {
-  background: #e8f5e9;
-  color: var(--success);
-}
-
-.badge-warning {
-  background: #fff3e0;
-  color: var(--warning);
-}
-
-.badge-danger {
-  background: #fce4ec;
-  color: var(--danger);
-}
-
+/* Logo */
 .logo {
   font-family: 'Inter', sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.03em;
-  color: var(--success);
+  color: var(--text-primary);
   text-transform: uppercase;
 }
 
+/* Animations */
 .hover-lift {
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
-
 .hover-lift:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
 }
 
 .reveal {
@@ -559,74 +265,11 @@ tbody tr:hover {
   transform: translateY(30px);
   transition: all 0.8s var(--ease-out);
 }
-
 .reveal.active {
   opacity: 1;
   transform: translateY(0);
 }
 
-.delay-1 {
-  transition-delay: 0.1s;
-}
-
-.delay-2 {
-  transition-delay: 0.25s;
-}
-
-.delay-3 {
-  transition-delay: 0.4s;
-}
-
-.lucide-md {
-  width: 22px;
-  height: 22px;
-  stroke-width: 1.75;
-}
-
-.icon-sm {
-  width: 20px;
-  height: 20px;
-}
-
-.icon-xs {
-  width: 16px;
-  height: 16px;
-}
-
-.btn-large {
-  padding: 0.875rem 2.5rem;
-  font-size: 0.9rem;
-}
-
-.btn-sm {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-}
-
-.text-warning {
-  color: var(--warning);
-}
-
-.text-success {
-  color: var(--success);
-}
-
-.alert-warning-border {
-  border-left: 3px solid var(--warning);
-}
-
-.text-capitalize {
-  text-transform: capitalize;
-}
-
-.text-uppercase {
-  text-transform: uppercase;
-}
-
-.flex-1 {
-  flex: 1;
-}
-
-.bg-warning-light {
-  background: #fffbeb;
-}
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.25s; }
+.delay-3 { transition-delay: 0.4s; }

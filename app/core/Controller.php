@@ -24,7 +24,7 @@ class Controller
      */
     public function __construct()
     {
-        $this->db = new Database();
+        $this->db = Database::getInstance();
         $this->user = $this->getCurrentUser();
         $this->authorize();
     }

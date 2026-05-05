@@ -1,79 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact — Boutique Store</title>
-
+  
+  <!-- Shared styles -->
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/landing.css">
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .gradient-text {
+      background: linear-gradient(135deg, #111 0%, #fa5400 50%, #111 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 4s ease-in-out infinite;
+    }
+    .contact {
+      margin-top: var(--space-2xl);
+      padding: 5rem 0;
+      max-width: 720px;
+    }
+    .contact-info {
+      margin-top: var(--space-3xl);
+      padding: var(--space-lg);
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+    }
+  </style>
 </head>
-
 <body>
-  <div class="cursor" id="cursorGlow"></div>
+  <div class="cursor-glow" id="cursorGlow"></div>
 
-  <nav class="navigation" id="navbar">
-    <div class="navcontainer">
+  <!-- Navbar -->
+  <nav class="landing-nav" id="navbar">
+    <div class="container d-flex justify-between align-center">
       <div class="logo">
-        <a class="logolink" href="index.html">Boutique<span class="logospan">Store</span></a>
+        <a href="index.html">Boutique<span style="font-weight:300;margin-left:4px">Store</span></a>
       </div>
-      <div class="navlinks">
+      <div class="landing-nav-links d-flex align-center">
         <a href="index.html#features">Features</a>
         <a href="about.html">About</a>
       </div>
     </div>
   </nav>
 
-  <header class="contacthero">
-    <div class="contactherocontent">
-      <h1 class="contacttitle">Reach Out To Us</h1>
-      <p class="contactsubtitle">We would like to hear from you! Fill out the form below or contact us directly.</p>
+  <!-- Hero -->
+  <header class="landing-hero reveal" style="min-height:40vh;background:var(--bg-secondary)">
+    <div class="hero-content" style="padding-top:4rem">
+      <h1 class="hero-title gradient-text">Reach Out To Us</h1>
+      <p class="hero-subtitle">We would like to hear from you! Fill out the form below or contact us directly.</p>
     </div>
   </header>
 
-  <section class="contactsection">
-    <form class="contactform">
-      <div class="formgroup">
-        <label class="formlabel" for="name">Name</label>
-        <input class="formcontrol" type="text" id="name" placeholder="Please Enter Your Name" required>
+  <!-- Contact Form -->
+  <section class="container contact reveal">
+    <form>
+      <div class="form-group">
+        <label class="form-label" for="name">Name</label>
+        <input class="form-control" type="text" id="name" placeholder="Please Enter Your Name" required>
       </div>
 
-      <div class="formgroup">
-        <label class="formlabel" for="email">Email</label>
-        <input class="formcontrol" type="email" id="email" placeholder="Please Enter Your Email" required>
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-control" type="email" id="email" placeholder="Please Enter Your Email" required>
       </div>
 
-      <div class="formgroup">
-        <label class="formlabel" for="message">Message</label>
-        <textarea class="formcontrol" id="message" placeholder="Please Enter Your Message" rows="5" required></textarea>
+      <div class="form-group">
+        <label class="form-label" for="message">Message</label>
+        <textarea class="form-control" id="message" placeholder="Please Enter Your Message" rows="5" required></textarea>
       </div>
 
-      <div class="formbtnbox">
-        <button type="submit" class="submitbtn">Send Message</button>
+      <div class="d-flex justify-center" style="margin-top:2rem">
+        <button type="submit" class="btn btn-primary hover-lift">Send Message</button>
       </div>
     </form>
   </section>
-  <div class="backbtnbox">
-    <a class="backbtn" href="index.html">Back To Home</a>
-  </div>
-  <footer class="contactfooter">
-    <div class="contactinfobox">
+<div style="display:flex;justify-content:center;margin-top:1rem">
+    <a href="index.html">Back To Home</a>
+    </div>
+  <!-- Contact Details -->
+  <footer class="site-footer reveal">
+    <div class="container contact-info text-center">
       <h3>Contact Details</h3>
       <p>Email: Team@boutiquestore.com</p>
       <p>Phone: +251944295939</p>
       <p>Address: Addis Ababa, Ethiopia</p>
-      <div class="socialicons">
+      <div class="d-flex justify-center gap-md" style="margin-top:1rem">
         <a href="#">Facebook</a>
         <a href="#">Twitter</a>
         <a href="#">Instagram</a>
       </div>
-      <p class="copyright">&copy; 2026 Boutique Store. All rights reserved.</p>
+      <p style="margin-top:1rem">&copy; 2026 Boutique Store. All rights reserved.</p>
     </div>
   </footer>
 
-  <script src="../js/landing.js"></script>
-</body>
+  <!-- JS for scroll + reveal -->
+  <script>
+    lucide.createIcons();
 
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('active');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
 </html>
