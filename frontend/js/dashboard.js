@@ -120,6 +120,16 @@ function setupRoleUI(role) {
       discBtn.onclick = applyDiscount;
       cartSummary.insertBefore(discBtn, document.getElementById('checkoutBtn'));
     }
+
+  } else if (role === 4 || role === 'viewer' || role === 'admin') {
+    userNameEl.textContent = localName || 'Report Viewer';
+    userRoleEl.textContent = 'Viewer';
+    navItems = [
+      { id: 'overview', icon: 'layout-dashboard', label: 'Overview' },
+      { id: 'reports', icon: 'bar-chart-2', label: 'Analytics' }
+    ];
+    defaultView = 'overview';
+    renderRecentSales();
   }
 
   // Avatar

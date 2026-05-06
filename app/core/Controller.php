@@ -58,7 +58,77 @@ class Controller
     }
 
     /**
-     * Check if user has permission
+     * ==========================================
+     * ROLE & PERMISSION METHODS (RBAC)
+     * ==========================================
+     */
+
+    /**
+     * Get user's role
+     */
+    protected function getUserRole()
+    {
+        if (!$this->isAuthenticated() || !isset($this->user['role_id'])) {
+            return null;
+        }
+
+        $roleModel = new \App\Models\Role();
+        return $roleModel->findById($this->user['role_id']);
+    }
+
+    /**
+     * Check if user has a specific role
+     */
+    protected function hasRole($roleName)
+    {
+        if (!$this->isAuthenticated()) {
+            return false;
+        }
+
+        $role = $this->getUserRole();
+        return $role && $role->name === $roleName;
+    }
+
+    /**
+     * Check if user has any of the given roles
+     */
+    protected function hasAnyRole($roles)
+    {
+        if (!is_array($roles)) {
+            $roles = [$roles];
+        }
+
+        foreach ($roles as $role) {
+            if ($this->hasRole($role)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Require a specific role or abort
+     */
+    protected function requireRole($roleName)
+    {
+        if (!$this->hasRole($roleName)) {
+            $this->abort(403, "Role '{$roleName}' required");
+        }
+    }
+
+    /**
+     * Require any of the given roles or abort
+     */
+    protected function requireAnyRole($roles)
+    {
+        if (!$this->hasAnyRole($roles)) {
+            $this->abort(403, 'Insufficient role privileges');
+        }
+    }
+
+    /**
+     * Check if user has a specific permission
      */
     protected function hasPermission($permission)
     {
@@ -66,19 +136,97 @@ class Controller
             return false;
         }
 
-        $role = $this->user['role'] ?? null;
-        $permissions = ROLE_PERMISSIONS[$role] ?? [];
-
-        return in_array($permission, $permissions, true);
+        $role = $this->getUserRole();
+        return $role && $role->hasPermission($permission);
     }
 
     /**
-     * Require permission or abort
+     * Check if user has any of the given permissions
+     */
+    protected function hasAnyPermission($permissions)
+    {
+        if (!is_array($permissions)) {
+            $permissions = [$permissions];
+        }
+
+        foreach ($permissions as $permission) {
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if user has all given permissions
+     */
+    protected function hasAllPermissions($permissions)
+    {
+        if (!is_array($permissions)) {
+            $permissions = [$permissions];
+        }
+
+        foreach ($permissions as $permission) {
+            if (!$this->hasPermission($permission)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Require a specific permission or abort
      */
     protected function requirePermission($permission)
     {
         if (!$this->hasPermission($permission)) {
-            $this->abort(403, 'Unauthorized');
+            $this->abort(403, "Permission '{$permission}' required");
+        }
+    }
+
+    /**
+     * Require any of the given permissions or abort
+     */
+    protected function requireAnyPermission($permissions)
+    {
+        if (!$this->hasAnyPermission($permissions)) {
+            $this->abort(403, 'Insufficient permissions');
+        }
+    }
+
+    /**
+     * Require all given permissions or abort
+     */
+    protected function requireAllPermissions($permissions)
+    {
+        if (!$this->hasAllPermissions($permissions)) {
+            $this->abort(403, 'Insufficient permissions');
+        }
+    }
+
+    /**
+     * Check resource access (resource.action pattern)
+     * Examples: 'items.create', 'users.edit', 'sales.delete'
+     */
+    protected function canAccess($resource, $action)
+    {
+        if (!$this->isAuthenticated()) {
+            return false;
+        }
+
+        $permission = "{$resource}.{$action}";
+        return $this->hasPermission($permission);
+    }
+
+    /**
+     * Require resource access or abort
+     */
+    protected function requireAccess($resource, $action)
+    {
+        if (!$this->canAccess($resource, $action)) {
+            $this->abort(403, "Access denied to {$resource}.{$action}");
         }
     }
 
