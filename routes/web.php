@@ -89,10 +89,19 @@ return function (Router $router) {
     */
 
     // ============================================
-    // ERROR ROUTES - DISABLED (not yet implemented)
+    // API ROUTES - PRODUCTS & CATEGORIES
+    // NOTE: specific paths must come before {id} wildcard routes
     // ============================================
-    /*
-    $router->get('/404', 'ErrorController@notFound', 'error.404');
-    $router->get('/500', 'ErrorController@serverError', 'error.500');
-    */
+
+    // Categories (specific — must be registered before /api/products/{id})
+    $router->get('/api/products/categories', 'ProductController@apiCategories', 'api.categories.index');
+    $router->post('/api/products/categories', 'ProductController@apiCreateCategory', 'api.categories.store');
+    $router->delete('/api/products/categories/{id}', 'ProductController@apiDeleteCategory', 'api.categories.destroy');
+
+    // Products CRUD
+    $router->get('/api/products', 'ProductController@index', 'api.products.index');
+    $router->post('/api/products', 'ProductController@store', 'api.products.store');
+    $router->get('/api/products/{id}', 'ProductController@show', 'api.products.show');
+    $router->put('/api/products/{id}', 'ProductController@update', 'api.products.update');
+    $router->delete('/api/products/{id}', 'ProductController@destroy', 'api.products.destroy');
 };
