@@ -19,7 +19,9 @@ class Item extends Model
              WHERE i.is_active = TRUE ORDER BY i.name ASC"
         );
         $rows = [];
-        while ($row = $result->fetch_assoc()) $rows[] = new static($row);
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = new static($row);
+        }
         return $rows;
     }
 
@@ -29,7 +31,8 @@ class Item extends Model
         $result = $instance->db->query(
             "SELECT i.*, c.name as category_name FROM items i
              LEFT JOIN categories c ON i.category_id = c.id
-             WHERE i.id = ? LIMIT 1", [$id]
+             WHERE i.id = ? LIMIT 1",
+            [$id]
         );
         $row = $result->fetch_assoc();
         return $row ? new static($row) : null;
@@ -62,7 +65,9 @@ class Item extends Model
 
         $result = $instance->db->query($sql, $binds);
         $rows = [];
-        while ($row = $result->fetch_assoc()) $rows[] = new static($row);
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = new static($row);
+        }
         return $rows;
     }
 
@@ -120,10 +125,13 @@ class Item extends Model
     {
         $result = $this->db->query(
             "SELECT s.*, b.name as branch_name FROM stock s
-             JOIN branches b ON s.branch_id = b.id WHERE s.item_id = ?", [$this->id]
+             JOIN branches b ON s.branch_id = b.id WHERE s.item_id = ?",
+            [$this->id]
         );
         $rows = [];
-        while ($row = $result->fetch_assoc()) $rows[] = $row;
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
         return $rows;
     }
 
@@ -140,7 +148,9 @@ class Item extends Model
 
     public function getProfitMargin()
     {
-        if (!$this->cost_price) return 0;
+        if (!$this->cost_price) {
+            return 0;
+        }
         return round((($this->selling_price - $this->cost_price) / $this->cost_price) * 100, 2);
     }
 
