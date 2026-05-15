@@ -31,7 +31,7 @@ class ProductController extends Controller
     {
         try {
             $cats = Category::all();
-            $this->ok(array_map(fn($c) => $c->toArray(), $cats));
+            $this->ok(array_map(fn ($c) => $c->toArray(), $cats));
         } catch (\Exception $e) {
             $this->fail($e->getMessage());
         }
@@ -86,7 +86,7 @@ class ProductController extends Controller
             $slice  = array_slice($all, ($page - 1) * $perPage, $perPage);
 
             $this->ok([
-                'data'        => array_map(fn($i) => $i->toArray(), $slice),
+                'data'        => array_map(fn ($i) => $i->toArray(), $slice),
                 'total'       => $total,
                 'page'        => $page,
                 'per_page'    => $perPage,
