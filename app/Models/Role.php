@@ -140,15 +140,44 @@ class Role extends Model
             return [];
         }
 
+        // Try new schema first (role_permissions table)
         $result = $this->db->query(
-            "SELECT * FROM permissions WHERE role_id = ? ORDER BY permission ASC",
+            "SELECT p.permission FROM permissions p 
+             JOIN role_permissions rp ON p.id = rp.permission_id 
+             WHERE rp.role_id = ? ORDER BY p.permission ASC",
             [$this->id]
         );
 
         $permissions = [];
-        while ($row = $result->fetch_assoc()) {
-            $permissions[] = $row['permission'];
+        if (is_array($result)) {
+            foreach ($result as $row) {
+                $permissions[] = $row['permission'];
+            }
+        } elseif (is_object($result) && method_exists($result, 'fetch_assoc')) {
+            while ($row = $result->fetch_assoc()) {
+                $permissions[] = $row['permission'];
+            }
         }
+        
+        // If no permissions found in new schema, try old schema
+        if (empty($permissions)) {
+            $result2 = $this->db->query(
+                "SELECT permission FROM permissions 
+                 WHERE role_id = ? ORDER BY permission ASC",
+                [$this->id]
+            );
+
+            if (is_array($result2)) {
+                foreach ($result2 as $row) {
+                    $permissions[] = $row['permission'];
+                }
+            } elseif (is_object($result2) && method_exists($result2, 'fetch_assoc')) {
+                while ($row = $result2->fetch_assoc()) {
+                    $permissions[] = $row['permission'];
+                }
+            }
+        }
+        
         return $permissions;
     }
 
@@ -161,12 +190,33 @@ class Role extends Model
             return false;
         }
 
+        // Try checking with the new schema (role_permissions + separate permissions table)
         $result = $this->db->query(
-            "SELECT id FROM permissions WHERE role_id = ? AND permission = ? LIMIT 1",
+            "SELECT rp.id FROM role_permissions rp 
+             JOIN permissions p ON p.id = rp.permission_id 
+             WHERE rp.role_id = ? AND (p.permission = ? OR CONCAT(p.resource, '.', p.action) = ?) LIMIT 1",
+            [$this->id, $permission, $permission]
+        );
+
+        if ((is_array($result) && count($result) > 0) || 
+            (is_object($result) && isset($result->num_rows) && $result->num_rows > 0)) {
+            return true;
+        }
+
+        // Fallback to old schema (permissions table with role_id and permission columns)
+        // This handles permissions stored directly on the permissions table
+        $result2 = $this->db->query(
+            "SELECT id FROM permissions 
+             WHERE role_id = ? AND permission = ? LIMIT 1",
             [$this->id, $permission]
         );
 
-        return $result->num_rows > 0;
+        if ((is_array($result2) && count($result2) > 0) || 
+            (is_object($result2) && isset($result2->num_rows) && $result2->num_rows > 0)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -187,9 +237,27 @@ class Role extends Model
             return true; // Already assigned
         }
 
+        // Find the permission ID by name
+        $permResult = $this->db->query(
+            "SELECT id FROM permissions WHERE name = ? LIMIT 1",
+            [$permission]
+        );
+
+        $permId = null;
+        if (is_array($permResult) && !empty($permResult)) {
+            $permId = $permResult[0]['id'];
+        } elseif (is_object($permResult) && $permResult->num_rows > 0) {
+            $row = $permResult->fetch_assoc();
+            $permId = $row['id'];
+        }
+
+        if (!$permId) {
+            throw new \Exception("Permission '{$permission}' not found");
+        }
+
         $result = $this->db->query(
-            "INSERT INTO permissions (role_id, permission) VALUES (?, ?)",
-            [$this->id, $permission]
+            "INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)",
+            [$this->id, $permId]
         );
         return $result !== null;
     }
@@ -215,7 +283,9 @@ class Role extends Model
         }
 
         $result = $this->db->query(
-            "DELETE FROM permissions WHERE role_id = ? AND permission = ?",
+            "DELETE rp FROM role_permissions rp 
+             JOIN permissions p ON p.id = rp.permission_id 
+             WHERE rp.role_id = ? AND p.name = ?",
             [$this->id, $permission]
         );
         return $result !== null;
@@ -230,8 +300,8 @@ class Role extends Model
             throw new \Exception('Role must be saved before syncing permissions');
         }
 
-        // Delete all existing permissions
-        $this->db->query("DELETE FROM permissions WHERE role_id = ?", [$this->id]);
+        // Delete all existing role-permission assignments
+        $this->db->query("DELETE FROM role_permissions WHERE role_id = ?", [$this->id]);
 
         // Assign new permissions
         foreach ($permissions as $permission) {

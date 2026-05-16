@@ -68,6 +68,33 @@ return function (Router $router) {
     $router->get('/api/password/verify-token', 'PasswordResetController@apiVerifyToken', 'api.password.verify');
 
     // ============================================
+    // API ROUTES - USER MANAGEMENT
+    // ============================================
+    $router->get('/api/users', 'Api\UserManagementController@listUsers', 'api.users.list');
+    $router->get('/api/users/{id}', 'Api\UserManagementController@showUser', 'api.users.show');
+    $router->post('/api/users', 'Api\UserManagementController@createUser', 'api.users.create');
+    $router->put('/api/users/{id}', 'Api\UserManagementController@updateUser', 'api.users.update');
+    $router->delete('/api/users/{id}', 'Api\UserManagementController@deleteUser', 'api.users.delete');
+    $router->post('/api/users/{id}/reset-password', 'Api\UserManagementController@resetUserPassword', 'api.users.reset-password');
+    $router->post('/api/users/{id}/unlock', 'Api\UserManagementController@unlockUser', 'api.users.unlock');
+
+    // ============================================
+    // API ROUTES - ROLE MANAGEMENT
+    // ============================================
+    $router->get('/api/roles', 'Api\RoleManagementController@listRoles', 'api.roles.list');
+    $router->get('/api/permissions', 'Api\RoleManagementController@listPermissions', 'api.permissions.list');
+    $router->post('/api/roles', 'Api\RoleManagementController@createRole', 'api.roles.create');
+    $router->put('/api/roles/{id}', 'Api\RoleManagementController@updateRole', 'api.roles.update');
+    $router->delete('/api/roles/{id}', 'Api\RoleManagementController@deleteRole', 'api.roles.delete');
+
+    // ============================================
+    // API ROUTES - BRANCH MANAGEMENT
+    // ============================================
+    $router->get('/api/branches', 'Api\BranchController@listBranches', 'api.branches.list');
+    $router->post('/api/branches', 'Api\BranchController@createBranch', 'api.branches.create');
+    $router->delete('/api/branches/{id}', 'Api\BranchController@deleteBranch', 'api.branches.delete');
+
+    // ============================================
     // API ROUTES (Optional - JSON responses) - DISABLED
     // ============================================
     /*

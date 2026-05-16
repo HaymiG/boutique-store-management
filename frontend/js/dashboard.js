@@ -4,7 +4,7 @@
 // ===================================
 
 // Database persistence
-window.saveDB = function() {
+window.saveDB = function () {
   localStorage.setItem('BoutiqueDB', JSON.stringify(window.MOCK_DATA));
 };
 
@@ -19,39 +19,55 @@ document.addEventListener('DOMContentLoaded', () => {
     window.saveDB();
   }
 
-  // Auth Check - Verify with backend
-  const userId = localStorage.getItem('userId');
-  if (!userId) {
-    window.location.href = '/login';
-    return;
+  // Render UI immediately from localStorage (prevents flash/flicker)
+  const cachedRole = localStorage.getItem('userRole');
+  if (cachedRole) {
+    const roleInt = parseInt(cachedRole);
+    setupRoleUI(isNaN(roleInt) ? cachedRole : roleInt);
+    setupMobileMenu();
   }
 
-  // Verify auth with backend
+  // Verify auth with backend silently (no redirect loop on failure)
   fetch('/api/user', {
     method: 'GET',
     headers: {
       'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
     }
   })
-  .then(response => {
-    if (!response.ok) throw new Error('Unauthorized');
-    return response.json();
-  })
-  .then(data => {
-    if (data.user) {
-      const userRole = data.user.role_id;
-      setupRoleUI(userRole);
-      setupMobileMenu();
-    }
-  })
-  .catch(error => {
-    console.error('Auth verification failed:', error);
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('csrfToken');
-    window.location.href = '/login';
-  });
+    .then(response => {
+      if (response.status === 401) {
+        // Only redirect on explicit 401 Unauthorized
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('csrfToken');
+        window.location.href = '/login';
+        return null;
+      }
+      if (!response.ok) return null;
+      return response.json();
+    })
+    .then(data => {
+      if (!data || !data.user) return;
+
+      // Update localStorage with fresh data from backend
+      const freshRole = data.user.role_id;
+      const freshName = (data.user.first_name || '') + ' ' + (data.user.last_name || '');
+      localStorage.setItem('userRole', freshRole);
+      localStorage.setItem('userName', freshName.trim());
+
+      // If role changed from what we rendered, re-render
+      const currentRole = parseInt(cachedRole);
+      if (freshRole !== currentRole && !cachedRole) {
+        // Only re-setup if we didn't render initially
+        setupRoleUI(freshRole);
+        setupMobileMenu();
+      }
+    })
+    .catch(error => {
+      // Network error — don't redirect, just log it
+      console.warn('Backend verification failed (network issue):', error.message);
+    });
 });
 
 // ——— Role-Based UI Setup ———
@@ -60,16 +76,16 @@ function setupRoleUI(role) {
   const userRoleEl = document.getElementById('userRoleDisplay');
   const userAvatarEl = document.getElementById('userAvatar');
   const sidebarNav = document.getElementById('sidebarNav');
-
   const localName = localStorage.getItem('userName');
+
   let navItems = [];
   let defaultView = '';
   let activeUserNameForFilter = localName || '';
 
   // Convert role_id to role name for comparison
   // 1 = manager, 2 = store_keeper, 3 = seller
-  if (role == 1 || role === 'manager') {
-    userNameEl.textContent = localName || 'Admin Master';
+  if (role === 1 || role === 'manager') {
+    userNameEl.textContent = localName || 'Admin';
     userRoleEl.textContent = 'Manager';
     navItems = [
       { id: 'overview', icon: 'layout-dashboard', label: 'Overview' },
@@ -83,8 +99,7 @@ function setupRoleUI(role) {
     renderRecentSales();
     renderBranches();
     renderUsers();
-
-  } else if (role == 2 || role === 'store_keeper') {
+  } else if (role === 2 || role === 'store_keeper') {
     userNameEl.textContent = localName || 'Alice Smith';
     userRoleEl.textContent = 'Store Keeper';
     navItems = [
@@ -97,8 +112,7 @@ function setupRoleUI(role) {
     document.getElementById('addItemBtn').onclick = createItem;
     renderStockAlerts();
     renderMySales(activeUserNameForFilter);
-
-  } else if (role == 3 || role === 'seller') {
+  } else if (role === 3 || role === 'seller') {
     userNameEl.textContent = localName || 'Sarah Connor';
     userRoleEl.textContent = 'Seller';
     navItems = [
@@ -109,7 +123,6 @@ function setupRoleUI(role) {
     defaultView = 'pos';
     renderPOSItems();
     renderMySales(activeUserNameForFilter);
-
     const cartSummary = document.querySelector('.cart-summary');
     if (!document.getElementById('discountBtn')) {
       const discBtn = document.createElement('button');
@@ -121,8 +134,7 @@ function setupRoleUI(role) {
       discBtn.onclick = applyDiscount;
       cartSummary.insertBefore(discBtn, document.getElementById('checkoutBtn'));
     }
-
-  } else if (role == 4 || role === 'viewer' || role === 'admin') {
+  } else if (role === 4 || role === 'viewer' || role === 'admin') {
     userNameEl.textContent = localName || 'Report Viewer';
     userRoleEl.textContent = 'Viewer';
     navItems = [
@@ -158,11 +170,9 @@ function switchView(viewId) {
   document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
   const target = document.getElementById(`view-${viewId}`);
   if (target) target.classList.add('active');
-
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const nav = document.getElementById(`nav-${viewId}`);
   if (nav) nav.classList.add('active');
-
   document.getElementById('sidebar').classList.remove('open');
 }
 
@@ -175,28 +185,25 @@ function logout() {
       'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
     }
   })
-  .then(response => response.json())
-  .then(data => {
-    // Clear local storage
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('csrfToken');
-    
-    // Redirect to login
-    window.location.href = '/login';
-  })
-  .catch(error => {
-    console.error('Logout error:', error);
-    
-    // Force logout anyway
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('csrfToken');
-    
-    window.location.href = '/login';
-  });
+    .then(response => response.json())
+    .then(data => {
+      // Clear local storage
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('csrfToken');
+      // Redirect to login
+      window.location.href = '/login';
+    })
+    .catch(error => {
+      console.error('Logout error:', error);
+      // Force logout anyway
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('csrfToken');
+      window.location.href = '/login';
+    });
 }
 
 // ——— Inventory ———
@@ -204,6 +211,7 @@ function renderInventoryTable() {
   const tbody = document.querySelector('#inventoryTable tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
+
   const inventory = window.MOCK_DATA.inventory || [];
   const userRole = parseInt(localStorage.getItem('userRole')) || localStorage.getItem('userRole');
 
@@ -262,8 +270,11 @@ function createItem() {
   if (name && price && qty) {
     window.MOCK_DATA.inventory.push({
       id: 'ITM' + Math.floor(Math.random() * 1000),
-      name, category: 'General', price: parseFloat(price),
-      stock: parseInt(qty), branch: 'Headquarters',
+      name,
+      category: 'General',
+      price: parseFloat(price),
+      stock: parseInt(qty),
+      branch: 'Headquarters',
       status: parseInt(qty) > 0 ? 'In Stock' : 'Out of Stock'
     });
     window.saveDB();
@@ -276,6 +287,7 @@ function renderRecentSales() {
   const tbody = document.querySelector('#recentSalesTable tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
+
   window.MOCK_DATA.recentSales.forEach(sale => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -296,6 +308,7 @@ function renderPOSItems() {
   const grid = document.getElementById('posProductGrid');
   if (!grid) return;
   grid.innerHTML = '';
+
   window.MOCK_DATA.inventory.forEach(item => {
     if (item.stock === 0) return;
     const div = document.createElement('div');
@@ -332,8 +345,10 @@ function updateCartUI() {
     document.getElementById('cartTotal').textContent = '$0.00';
     return;
   }
+
   container.innerHTML = '';
   let subtotal = 0;
+
   cart.forEach((item, index) => {
     const total = item.price * item.quantity;
     subtotal += total;
@@ -351,12 +366,16 @@ function updateCartUI() {
     `;
     container.appendChild(div);
   });
+
   lucide.createIcons();
   document.getElementById('cartSubtotal').textContent = `$${subtotal.toFixed(2)}`;
   document.getElementById('cartTotal').textContent = `$${subtotal.toFixed(2)}`;
 }
 
-function removeFromCart(index) { cart.splice(index, 1); updateCartUI(); }
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  updateCartUI();
+}
 
 function processCheckout() {
   if (cart.length === 0) return alert('Cart is empty.');
@@ -366,85 +385,573 @@ function processCheckout() {
 }
 
 // ——— Branches ———
-function renderBranches() {
+async function renderBranches() {
   const tbody = document.querySelector('#branchesTable tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  (window.MOCK_DATA.branches || []).forEach((b, i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="color:var(--text-secondary)">${b.id}</td>
-      <td style="font-weight:600">${b.name}</td>
-      <td>${b.manager}</td>
-      <td>${b.totalItems}</td>
-      <td><button class="btn btn-danger" style="padding:0.25rem 0.75rem;font-size:0.75rem" onclick="deleteBranch(${i})">Delete</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
 
-function createBranch() {
-  const name = prompt('Branch Name:');
-  const mgr = prompt('Manager Name:');
-  if (name && mgr) {
-    window.MOCK_DATA.branches.push({ id: 'BR' + Math.floor(Math.random() * 1000), name, manager: mgr, totalItems: 0, totalSales: '$0' });
-    window.saveDB();
-    renderBranches();
+  try {
+    const response = await fetch('/api/branches', {
+      headers: {
+        'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
+      }
+    });
+    const result = await response.json();
+    const branches = result.branches || [];
+
+    branches.forEach((b, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="color:var(--text-secondary)">${b.id}</td>
+        <td style="font-weight:600">${b.name}</td>
+        <td>${b.address || '-'}</td>
+        <td>${b.manager_id || '-'}</td>
+        <td><button class="btn btn-danger" style="padding:0.25rem 0.75rem;font-size:0.75rem" onclick="deleteBranch(${b.id})">Delete</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (error) {
+    console.error('Error loading branches:', error);
   }
 }
 
-function deleteBranch(index) {
-  if (confirm('Delete this branch?')) {
-    window.MOCK_DATA.branches.splice(index, 1);
-    window.saveDB();
-    renderBranches();
+function openBranchForm() {
+  const modal = document.getElementById('branchFormModal');
+  if (modal) {
+    document.getElementById('branchForm').reset();
+    modal.style.display = 'flex';
   }
 }
 
-// ——— Users ———
-function renderUsers() {
-  const tbody = document.querySelector('#usersTable tbody');
+function closeBranchForm() {
+  const modal = document.getElementById('branchFormModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitBranchForm(e) {
+  e.preventDefault();
+  const name = document.getElementById('branchName').value.trim();
+  const address = document.getElementById('branchAddress').value.trim();
+  if (name) {
+    try {
+      const response = await fetch('/api/branches', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
+        },
+        body: JSON.stringify({ name: name, address: address || '', manager_id: null })
+      });
+      const result = await response.json();
+      if (result.success) {
+        closeBranchForm();
+        renderBranches();
+        populateBranchDropdown();
+      } else {
+        alert(result.message || 'Failed to create branch');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error connecting to server');
+    }
+  }
+}
+
+let branchToDeleteId = null;
+
+function closeDeleteConfirmModal() {
+  const modal = document.getElementById('deleteConfirmModal');
+  if (modal) modal.style.display = 'none';
+  branchToDeleteId = null;
+}
+
+function deleteBranch(branchId) {
+  branchToDeleteId = branchId;
+  const modal = document.getElementById('deleteConfirmModal');
+  if (modal) {
+    document.getElementById('confirmDeleteBtn').onclick = executeDeleteBranch;
+    modal.style.display = 'flex';
+  }
+}
+
+async function executeDeleteBranch() {
+  if (!branchToDeleteId) return;
+  try {
+    const response = await fetch(`/api/branches/${branchToDeleteId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
+      }
+    });
+    const result = await response.json();
+    if (result.success) {
+      renderBranches();
+      populateBranchDropdown();
+      closeDeleteConfirmModal();
+    } else {
+      alert(result.message || 'Failed to delete branch');
+      closeDeleteConfirmModal();
+    }
+  } catch (error) {
+    console.error('Error deleting branch:', error);
+    alert('Error deleting branch');
+    closeDeleteConfirmModal();
+  }
+}
+
+// ====================================================
+// USER MANAGEMENT (Phase 2.3 — API-backed)
+// ====================================================
+let editingUserId = null;
+
+async function renderUsers() {
+  const tbody = document.getElementById('usersTableBody') || document.querySelector('#usersTable tbody');
   if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted)">Loading users...</td></tr>';
+
+  // Populate role filter dropdown
+  await populateRoleDropdowns();
+
+  const search = document.getElementById('userSearchInput')?.value || '';
+  const role = document.getElementById('userRoleFilter')?.value || '';
+  const statusEl = document.getElementById('userStatusFilter');
+  const status = statusEl ? statusEl.value : '';
+
+  const result = await UsersAPI.list(1, 50, search, role, status);
+  if (!result || !result.success) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--danger)">Failed to load users.</td></tr>';
+    return;
+  }
+
+  const users = result.users || [];
+  if (users.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted)">No users found.</td></tr>';
+    return;
+  }
+
   tbody.innerHTML = '';
-  (window.MOCK_DATA.users || []).forEach((u, i) => {
-    const btnText = u.status === 'Active' ? 'Deactivate' : 'Activate';
-    const btnClass = u.status === 'Active' ? 'btn-danger' : 'btn-primary';
-    const statusClass = u.status === 'Active' ? 'badge-success' : 'badge-danger';
+  users.forEach(u => {
+    const isActive = u.is_active == 1;
+    const statusClass = isActive ? 'badge-success' : 'badge-danger';
+    const statusText = isActive ? 'Active' : 'Inactive';
+    const roleName = u.role_name || 'N/A';
+    const branchName = u.branch_name || '—';
+    const lastLogin = u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never';
+    const fullName = (u.first_name || '') + ' ' + (u.last_name || '');
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="color:var(--text-secondary)">${u.id}</td>
-      <td style="font-weight:600">${u.name}</td>
+      <td style="font-weight:600">${fullName.trim()}</td>
       <td>${u.email}</td>
-      <td style="text-transform:capitalize">${u.role.replace('_', ' ')}</td>
-      <td><span class="badge ${statusClass}">${u.status}</span></td>
-      <td><button class="btn ${btnClass}" style="padding:0.25rem 0.75rem;font-size:0.75rem" onclick="toggleUserStatus(${i})">${btnText}</button></td>
+      <td style="text-transform:capitalize">${roleName}</td>
+      <td>${branchName}</td>
+      <td><span class="badge ${statusClass}">${statusText}</span></td>
+      <td style="font-size:0.8rem">${lastLogin}</td>
+      <td>
+        <div style="display:flex;gap:0.25rem;flex-wrap:wrap">
+          <button class="btn btn-outline" style="padding:0.2rem 0.5rem;font-size:0.7rem" onclick="editUser(${u.id})">Edit</button>
+          <button class="btn btn-danger" style="padding:0.2rem 0.5rem;font-size:0.7rem" onclick="deleteUser(${u.id})">Delete</button>
+          ${u.is_locked ? `<button class="btn btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem" onclick="unlockUser(${u.id})">Unlock</button>` : ''}
+        </div>
+      </td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-function createUser() {
-  const name = prompt('Full Name:');
-  const email = prompt('Email:');
-  const role = prompt('Role (manager / store_keeper / seller):');
-  if (name && email && role) {
-    window.MOCK_DATA.users.push({ id: 'USR-' + Math.floor(Math.random() * 1000), name, email, role, password: 'password123', status: 'Active' });
-    window.saveDB();
-    renderUsers();
+async function populateRoleDropdowns() {
+  // User form role dropdown
+  const userRoleSelect = document.getElementById('userRole');
+  const filterRoleSelect = document.getElementById('userRoleFilter');
+
+  try {
+    const result = await RolesAPI.list();
+    if (!result || !result.success) {
+      console.error('Failed to fetch roles:', result?.message || 'Unknown error');
+      return;
+    }
+
+    const roles = result.roles || [];
+
+    // Populate form dropdown
+    if (userRoleSelect && userRoleSelect.options.length <= 1) {
+      roles.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.textContent = r.name;
+        userRoleSelect.appendChild(opt);
+      });
+    }
+
+    // Populate filter dropdown
+    if (filterRoleSelect && filterRoleSelect.options.length <= 1) {
+      roles.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.textContent = r.name;
+        filterRoleSelect.appendChild(opt);
+      });
+    }
+  } catch (error) {
+    console.error('Error loading roles:', error);
   }
 }
 
-function toggleUserStatus(index) {
-  const u = window.MOCK_DATA.users[index];
-  u.status = u.status === 'Active' ? 'Inactive' : 'Active';
-  window.saveDB();
-  renderUsers();
+async function populateBranchDropdown() {
+  const branchSelect = document.getElementById('userBranch');
+  if (!branchSelect) return;
+
+  // Clear existing options except the first one
+  while (branchSelect.options.length > 1) {
+    branchSelect.remove(1);
+  }
+
+  try {
+    const response = await fetch('/api/branches', {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
+      }
+    });
+
+    if (!response.ok) {
+      console.error('Failed to fetch branches:', response.status, response.statusText);
+      return;
+    }
+
+    const result = await response.json();
+    if (!result || !result.success) {
+      console.error('Failed to fetch branches:', result?.message || 'Unknown error');
+      return;
+    }
+
+    const branches = result.branches || [];
+    branches.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      opt.textContent = b.name;
+      branchSelect.appendChild(opt);
+    });
+  } catch (error) {
+    console.error('Failed to load branches:', error);
+  }
+}
+
+function openUserForm(userId) {
+  editingUserId = userId || null;
+  const modal = document.getElementById('userFormModal');
+  const title = document.getElementById('userFormTitle');
+  const passwordInput = document.getElementById('userPassword');
+  const passwordHint = document.getElementById('passwordHint');
+  const form = document.getElementById('userForm');
+
+  form.reset();
+
+  if (editingUserId) {
+    title.textContent = 'Edit User';
+    passwordInput.removeAttribute('required');
+    if (passwordHint) {
+      passwordHint.style.display = 'block';
+    }
+    // Load existing user data
+    loadUserForEdit(editingUserId);
+  } else {
+    title.textContent = 'Add User';
+    passwordInput.setAttribute('required', 'required');
+    if (passwordHint) {
+      passwordHint.style.display = 'none';
+    }
+  }
+
+  populateRoleDropdowns();
+  populateBranchDropdown();
+  modal.style.display = 'flex';
+}
+
+async function loadUserForEdit(userId) {
+  const result = await UsersAPI.get(userId);
+  if (!result || !result.success || !result.user) {
+    alert('Failed to load user data.');
+    return;
+  }
+
+  const u = result.user;
+  document.getElementById('userEmail').value = u.email || '';
+  document.getElementById('userFirstName').value = u.first_name || '';
+  document.getElementById('userLastName').value = u.last_name || '';
+  document.getElementById('userRole').value = u.role_id || '';
+  document.getElementById('userActive').checked = u.is_active == 1;
+
+  const branchSelect = document.getElementById('userBranch');
+  if (branchSelect && u.branch_id) {
+    branchSelect.value = u.branch_id;
+  }
+}
+
+function closeUserForm() {
+  editingUserId = null;
+  const modal = document.getElementById('userFormModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitUserForm(e) {
+  e.preventDefault();
+
+  const userData = {
+    email: document.getElementById('userEmail').value.trim(),
+    first_name: document.getElementById('userFirstName').value.trim(),
+    last_name: document.getElementById('userLastName').value.trim(),
+    role_id: parseInt(document.getElementById('userRole').value),
+    branch_id: document.getElementById('userBranch').value || null,
+    is_active: document.getElementById('userActive').checked ? 1 : 0
+  };
+
+  const password = document.getElementById('userPassword').value;
+  if (password) {
+    userData.password = password;
+  }
+
+  let result;
+  if (editingUserId) {
+    result = await UsersAPI.update(editingUserId, userData);
+  } else {
+    if (!password) {
+      alert('Password is required for new users.');
+      return;
+    }
+    result = await UsersAPI.create(userData);
+  }
+
+  if (!result) return;
+
+  if (result.success) {
+    closeUserForm();
+    renderUsers();
+  } else {
+    const errorMsg = result.errors
+      ? Object.values(result.errors).join('\n')
+      : result.message || 'Failed to save user.';
+    alert(errorMsg);
+  }
+}
+
+async function editUser(userId) {
+  openUserForm(userId);
+}
+
+async function deleteUser(userId) {
+  if (!confirm('Are you sure you want to delete this user?')) return;
+  const result = await UsersAPI.delete(userId);
+  if (result && result.success) {
+    renderUsers();
+  } else {
+    alert(result?.message || 'Failed to delete user.');
+  }
+}
+
+async function unlockUser(userId) {
+  if (!confirm('Unlock this user account?')) return;
+  const result = await UsersAPI.unlock(userId);
+  if (result && result.success) {
+    alert('User unlocked successfully.');
+    renderUsers();
+  } else {
+    alert(result?.message || 'Failed to unlock user.');
+  }
+}
+
+let filterDebounce = null;
+
+function filterUsersTable() {
+  clearTimeout(filterDebounce);
+  filterDebounce = setTimeout(() => {
+    renderUsers();
+  }, 300);
+}
+
+// ====================================================
+// ROLE MANAGEMENT (Phase 2.3 — API-backed)
+// ====================================================
+let editingRoleId = null;
+
+async function renderRoles() {
+  const tbody = document.getElementById('rolesTableBody') || document.querySelector('#rolesTable tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Loading roles...</td></tr>';
+
+  const result = await RolesAPI.list();
+  if (!result || !result.success) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--danger)">Failed to load roles.</td></tr>';
+    return;
+  }
+
+  const roles = result.roles || [];
+  if (roles.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">No roles found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  roles.forEach(r => {
+    const permCount = (r.permissions || []).length;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:600;text-transform:capitalize">${r.name}</td>
+      <td style="color:var(--text-secondary)">${r.description || '—'}</td>
+      <td style="text-align:center"><span class="badge badge-success">${permCount}</span></td>
+      <td>
+        <div style="display:flex;gap:0.25rem">
+          <button class="btn btn-outline" style="padding:0.2rem 0.5rem;font-size:0.7rem" onclick="editRole(${r.id})">Edit</button>
+          <button class="btn btn-danger" style="padding:0.2rem 0.5rem;font-size:0.7rem" onclick="deleteRole(${r.id})">Delete</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function openRoleForm(roleId) {
+  editingRoleId = roleId || null;
+  const modal = document.getElementById('roleFormModal');
+  const title = document.getElementById('roleFormTitle');
+  const form = document.getElementById('roleForm');
+
+  form.reset();
+
+  // Load all permissions for checkboxes
+  await loadPermissionCheckboxes();
+
+  if (editingRoleId) {
+    title.textContent = 'Edit Role';
+    await loadRoleForEdit(editingRoleId);
+  } else {
+    title.textContent = 'Add Role';
+  }
+
+  modal.style.display = 'flex';
+}
+
+async function loadPermissionCheckboxes() {
+  const container = document.getElementById('rolePermissions');
+  if (!container) return;
+
+  const result = await RolesAPI.permissions();
+  if (!result || !result.success) {
+    container.innerHTML = '<p style="color:var(--danger)">Failed to load permissions.</p>';
+    return;
+  }
+
+  const permissions = result.permissions || [];
+  if (permissions.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-muted)">No permissions available.</p>';
+    return;
+  }
+
+  // Group by resource
+  const grouped = {};
+  permissions.forEach(p => {
+    const resource = p.resource || p.name?.split('.')[0] || 'other';
+    if (!grouped[resource]) grouped[resource] = [];
+    grouped[resource].push(p);
+  });
+
+  container.innerHTML = '';
+  Object.entries(grouped).forEach(([resource, perms]) => {
+    const section = document.createElement('div');
+    section.style.marginBottom = '0.75rem';
+    section.innerHTML = `<strong style="text-transform:capitalize;font-size:0.8rem;color:var(--text-secondary)">${resource}</strong>`;
+    perms.forEach(p => {
+      const label = document.createElement('label');
+      label.style.cssText = 'display:flex;align-items:center;gap:0.5rem;margin:0.25rem 0;font-size:0.85rem;cursor:pointer';
+      label.innerHTML = `<input type="checkbox" name="permissions" value="${p.id}"> ${p.name || p.action || p.permission}`;
+      section.appendChild(label);
+    });
+    container.appendChild(section);
+  });
+}
+
+async function loadRoleForEdit(roleId) {
+  const result = await RolesAPI.list();
+  if (!result || !result.success) return;
+
+  const role = (result.roles || []).find(r => r.id == roleId);
+  if (!role) return;
+
+  document.getElementById('roleName').value = role.name || '';
+  document.getElementById('roleDescription').value = role.description || '';
+
+  // Check the assigned permissions
+  const assignedIds = (role.permissions || []).map(p => String(p.id));
+  document.querySelectorAll('#rolePermissions input[type="checkbox"]').forEach(cb => {
+    cb.checked = assignedIds.includes(cb.value);
+  });
+}
+
+function closeRoleForm() {
+  editingRoleId = null;
+  const modal = document.getElementById('roleFormModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitRoleForm(e) {
+  e.preventDefault();
+
+  const selectedPermissions = [];
+  document.querySelectorAll('#rolePermissions input[type="checkbox"]:checked').forEach(cb => {
+    selectedPermissions.push(parseInt(cb.value));
+  });
+
+  const roleData = {
+    name: document.getElementById('roleName').value.trim(),
+    description: document.getElementById('roleDescription').value.trim(),
+    permissions: selectedPermissions
+  };
+
+  if (!roleData.name) {
+    alert('Role name is required.');
+    return;
+  }
+
+  let result;
+  if (editingRoleId) {
+    result = await RolesAPI.update(editingRoleId, roleData);
+  } else {
+    result = await RolesAPI.create(roleData);
+  }
+
+  if (!result) return;
+
+  if (result.success) {
+    closeRoleForm();
+    renderRoles()
+  } else {
+    const errorMsg = result.errors
+      ? Object.values(result.errors).join('\n')
+      : result.message || 'Failed to save role.';
+    alert(errorMsg);
+  }
+}
+
+async function editRole(roleId) {
+  openRoleForm(roleId);
+}
+
+async function deleteRole(roleId) {
+  if (!confirm('Are you sure you want to delete this role?')) return;
+  const result = await RolesAPI.delete(roleId);
+  if (result && result.success) {
+    renderRoles();
+  } else {
+    alert(result?.message || 'Failed to delete role.');
+  }
 }
 
 // ——— Reports ———
 function generateReport(type) {
   const log = document.getElementById('reportLog');
   const title = document.getElementById('reportTitle');
+
   if (type === 'daily') {
     title.textContent = 'Daily Sales — ' + new Date().toLocaleDateString();
     log.textContent = JSON.stringify(window.MOCK_DATA.recentSales.slice(0, 2), null, 2);
@@ -463,11 +970,13 @@ function generateReport(type) {
 function renderStockAlerts() {
   const container = document.getElementById('stockAlertsContainer');
   if (!container) return;
+
   const low = window.MOCK_DATA.inventory.filter(i => i.stock < 5);
   if (low.length === 0) {
     container.innerHTML = '<p style="color:var(--success)">All stock levels are optimal.</p>';
     return;
   }
+
   container.innerHTML = low.map(item => `
     <div class="data-panel" style="margin-bottom:1rem;border-left:3px solid var(--warning)">
       <h4 style="color:var(--warning);font-size:0.875rem;font-weight:600;margin-bottom:0.25rem">Low Stock: ${item.name}</h4>
@@ -485,11 +994,13 @@ function renderMySales(userName) {
   const tbody = document.querySelector('#mySalesTable tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
+
   const mySales = (window.MOCK_DATA.recentSales || []).filter(s => s.seller === userName);
   if (mySales.length === 0) {
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">No sales recorded yet.</td></tr>';
     return;
   }
+
   mySales.forEach(s => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
