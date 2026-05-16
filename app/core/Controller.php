@@ -258,8 +258,9 @@ class Controller
      */
     protected function resultToArray($result)
     {
-        if (is_array($result))
+        if (is_array($result)) {
             return $result;
+        }
         $data = [];
         if ($result instanceof \mysqli_result) {
             while ($row = $result->fetch_assoc()) {

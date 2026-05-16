@@ -158,7 +158,7 @@ class Role extends Model
                 $permissions[] = $row['permission'];
             }
         }
-        
+
         // If no permissions found in new schema, try old schema
         if (empty($permissions)) {
             $result2 = $this->db->query(
@@ -177,7 +177,7 @@ class Role extends Model
                 }
             }
         }
-        
+
         return $permissions;
     }
 
@@ -198,7 +198,7 @@ class Role extends Model
             [$this->id, $permission, $permission]
         );
 
-        if ((is_array($result) && count($result) > 0) || 
+        if ((is_array($result) && count($result) > 0) ||
             (is_object($result) && isset($result->num_rows) && $result->num_rows > 0)) {
             return true;
         }
@@ -211,7 +211,7 @@ class Role extends Model
             [$this->id, $permission]
         );
 
-        if ((is_array($result2) && count($result2) > 0) || 
+        if ((is_array($result2) && count($result2) > 0) ||
             (is_object($result2) && isset($result2->num_rows) && $result2->num_rows > 0)) {
             return true;
         }
