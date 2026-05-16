@@ -254,6 +254,25 @@ class Controller
     }
 
     /**
+     * Convert mysqli_result to an array
+     */
+    protected function resultToArray($result)
+    {
+        if (is_array($result)) {
+            return $result;
+        }
+        $data = [];
+        if ($result instanceof \mysqli_result) {
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+        }
+        return $data;
+    }
+
+
+
+    /**
      * Return JSON response
      */
     protected function json($data, $statusCode = 200)

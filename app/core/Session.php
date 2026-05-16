@@ -106,7 +106,7 @@ class Session
      */
     public function setUser($userData)
     {
-        $_SESSION[$this->authKey] = $userData;
+        $_SESSION[AUTH_SESSION_NAME] = $userData;
         return $this;
     }
 
@@ -115,7 +115,7 @@ class Session
      */
     public function getUser()
     {
-        return $_SESSION[$this->authKey] ?? null;
+        return $_SESSION[AUTH_SESSION_NAME] ?? null;
     }
 
     /**
@@ -132,7 +132,7 @@ class Session
      */
     public function isAuthenticated()
     {
-        return isset($_SESSION[$this->authKey]) && !empty($_SESSION[$this->authKey]);
+        return isset($_SESSION[AUTH_SESSION_NAME]) && !empty($_SESSION[AUTH_SESSION_NAME]);
     }
 
     /**
@@ -140,7 +140,7 @@ class Session
      */
     public function clearUser()
     {
-        unset($_SESSION[$this->authKey]);
+        unset($_SESSION[AUTH_SESSION_NAME]);
         return $this;
     }
 
