@@ -68,11 +68,12 @@ function setupRoleUI(role) {
 
   // Convert role_id to role name for comparison
   // 1 = manager, 2 = store_keeper, 3 = seller
-  if (role === 1 || role === 'manager') {
+  if (role == 1 || role === 'manager') {
     userNameEl.textContent = localName || 'Admin Master';
     userRoleEl.textContent = 'Manager';
     navItems = [
       { id: 'overview', icon: 'layout-dashboard', label: 'Overview' },
+      { id: 'products', icon: 'tag', label: 'Products' },
       { id: 'branches', icon: 'store', label: 'Branches' },
       { id: 'users', icon: 'users', label: 'Users' },
       { id: 'inventory', icon: 'package-search', label: 'Inventory' },
@@ -83,7 +84,7 @@ function setupRoleUI(role) {
     renderBranches();
     renderUsers();
 
-  } else if (role === 2 || role === 'store_keeper') {
+  } else if (role == 2 || role === 'store_keeper') {
     userNameEl.textContent = localName || 'Alice Smith';
     userRoleEl.textContent = 'Store Keeper';
     navItems = [
@@ -97,7 +98,7 @@ function setupRoleUI(role) {
     renderStockAlerts();
     renderMySales(activeUserNameForFilter);
 
-  } else if (role === 3 || role === 'seller') {
+  } else if (role == 3 || role === 'seller') {
     userNameEl.textContent = localName || 'Sarah Connor';
     userRoleEl.textContent = 'Seller';
     navItems = [
@@ -121,7 +122,7 @@ function setupRoleUI(role) {
       cartSummary.insertBefore(discBtn, document.getElementById('checkoutBtn'));
     }
 
-  } else if (role === 4 || role === 'viewer' || role === 'admin') {
+  } else if (role == 4 || role === 'viewer' || role === 'admin') {
     userNameEl.textContent = localName || 'Report Viewer';
     userRoleEl.textContent = 'Viewer';
     navItems = [
