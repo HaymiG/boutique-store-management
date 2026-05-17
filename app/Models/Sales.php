@@ -20,8 +20,8 @@ class Sales extends Model
     {
         $result = $this->db->query(
             "SELECT si.*, i.name, i.sku FROM sales_items si
-             JOIN items i ON si.item_id = i.id
-             WHERE si.sales_id = ?",
+                JOIN items i ON si.item_id = i.id
+                WHERE si.sales_id = ?",
             [$this->id]
         );
 

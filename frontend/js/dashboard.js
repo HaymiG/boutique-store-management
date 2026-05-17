@@ -8,6 +8,9 @@ window.saveDB = function() {
   localStorage.setItem('BoutiqueDB', JSON.stringify(window.MOCK_DATA));
 };
 
+// Guard to prevent setupRoleUI from being called multiple times
+let roleUISetup = false;
+
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
 
@@ -21,37 +24,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auth Check - Verify with backend
   const userId = localStorage.getItem('userId');
+  const userRole = localStorage.getItem('userRole');
+  
   if (!userId) {
-    window.location.href = '/login';
+    console.log('No userId in localStorage, redirecting to login');
+    window.location.href = '/login?reason=no_session';
     return;
   }
 
-  // Verify auth with backend
-  fetch('/api/user', {
-    method: 'GET',
-    headers: {
-      'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
+  // If we have cached user data, use it to setup UI while verifying with backend
+  if (userRole && !roleUISetup) {
+    roleUISetup = true;
+    setupRoleUI(parseInt(userRole));
+    setupMobileMenu();
+    
+    // Load branches into filter dropdown
+    if (typeof loadBranchesIntoFilter === 'function') {
+      loadBranchesIntoFilter();
     }
-  })
-  .then(response => {
-    if (!response.ok) throw new Error('Unauthorized');
-    return response.json();
-  })
-  .then(data => {
-    if (data.user) {
-      const userRole = data.user.role_id;
-      setupRoleUI(userRole);
-      setupMobileMenu();
-    }
-  })
-  .catch(error => {
-    console.error('Auth verification failed:', error);
+  }
+
+  // Verify auth with backend (non-blocking)
+  const csrfToken = localStorage.getItem('csrfToken');
+  if (csrfToken) {
+    fetch('/api/user', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.warn('API user verification failed:', response.status);
+        return null;
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data && data.user) {
+        // Update role UI if data changed
+        const newRole = data.user.role_id;
+        if (newRole && newRole !== userRole) {
+          console.log('User role changed, updating UI');
+          setupRoleUI(newRole);
+        }
+      }
+    })
+    .catch(error => {
+      console.warn('Auth verification error (non-blocking):', error.message);
+      // Don't redirect on error - user data is already cached in localStorage
+    });
+  } else {
+    // No CSRF token, clear auth and redirect
+    console.log('No CSRF token, redirecting to login');
     localStorage.removeItem('userId');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userName');
-    localStorage.removeItem('csrfToken');
-    window.location.href = '/login';
-  });
+    window.location.href = '/login?reason=no_csrf';
+  }
 });
 
 // ——— Role-Based UI Setup ———
@@ -83,6 +114,8 @@ function setupRoleUI(role) {
     renderRecentSales();
     renderBranches();
     renderUsers();
+    // Initialize inventory for managers
+    setTimeout(() => { loadInventory(); }, 300);
 
   } else if (role == 2 || role === 'store_keeper') {
     userNameEl.textContent = localName || 'Alice Smith';
@@ -97,6 +130,8 @@ function setupRoleUI(role) {
     document.getElementById('addItemBtn').onclick = createItem;
     renderStockAlerts();
     renderMySales(activeUserNameForFilter);
+    // Initialize inventory for store keepers
+    setTimeout(() => { loadInventory(); loadLowStock(); }, 300);
 
   } else if (role == 3 || role === 'seller') {
     userNameEl.textContent = localName || 'Sarah Connor';
@@ -138,6 +173,9 @@ function setupRoleUI(role) {
   const initials = finalName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
   userAvatarEl.textContent = initials;
 
+  // Clear nav before rendering new items
+  sidebarNav.innerHTML = '';
+  
   // Render Nav
   navItems.forEach(item => {
     const btn = document.createElement('div');
@@ -164,6 +202,13 @@ function switchView(viewId) {
   if (nav) nav.classList.add('active');
 
   document.getElementById('sidebar').classList.remove('open');
+  
+  // Load data for specific views
+  if (viewId === 'inventory' && typeof loadInventory === 'function') {
+    loadInventory();
+    if (typeof loadLowStock === 'function') loadLowStock();
+    if (typeof loadInventoryHistory === 'function') loadInventoryHistory();
+  }
 }
 
 function logout() {
@@ -201,75 +246,12 @@ function logout() {
 
 // ——— Inventory ———
 function renderInventoryTable() {
-  const tbody = document.querySelector('#inventoryTable tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-  const inventory = window.MOCK_DATA.inventory || [];
-  const userRole = parseInt(localStorage.getItem('userRole')) || localStorage.getItem('userRole');
-
-  inventory.forEach((item, index) => {
-    let statusClass = 'badge-success';
-    if (item.stock < 10) statusClass = 'badge-warning';
-    if (item.stock === 0) statusClass = 'badge-danger';
-
-    let actionBtns = '';
-    if (userRole === 2 || userRole === 'store_keeper') {
-      actionBtns = `<button class="btn btn-outline" style="padding:0.25rem 0.75rem;font-size:0.75rem" onclick="updateItemQty(${index})">Update</button>`;
-    } else if (userRole === 1 || userRole === 'manager') {
-      actionBtns = `<button class="btn btn-outline" style="padding:0.25rem 0.75rem;font-size:0.75rem" onclick="transferItem(${index})">Transfer</button>`;
-    }
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="color:var(--text-secondary)">${item.id}</td>
-      <td style="font-weight:600">${item.name}</td>
-      <td>${item.category}</td>
-      <td>$${item.price.toFixed(2)}</td>
-      <td>${item.stock}</td>
-      <td><span class="badge ${statusClass}">${item.stock === 0 ? 'Out' : (item.stock < 10 ? 'Low' : 'In Stock')}</span></td>
-      <td>${item.branch}</td>
-      ${actionBtns ? `<td>${actionBtns}</td>` : ''}
-    `;
-    tbody.appendChild(tr);
-  });
+  // Removed mock data rendering
 }
 
-function updateItemQty(index) {
-  const item = window.MOCK_DATA.inventory[index];
-  const newQty = prompt(`Update stock for ${item.name} (Current: ${item.stock}):`, item.stock);
-  if (newQty !== null && !isNaN(newQty)) {
-    window.MOCK_DATA.inventory[index].stock = parseInt(newQty);
-    window.saveDB();
-    renderInventoryTable();
-    checkAlerts();
-  }
-}
-
-function transferItem(index) {
-  const item = window.MOCK_DATA.inventory[index];
-  const newBranch = prompt(`Transfer ${item.name} to branch (Current: ${item.branch}):`, '');
-  if (newBranch) {
-    window.MOCK_DATA.inventory[index].branch = newBranch;
-    window.saveDB();
-    renderInventoryTable();
-  }
-}
-
-function createItem() {
-  const name = prompt('Item Name:');
-  const price = prompt('Price:');
-  const qty = prompt('Initial Quantity:');
-  if (name && price && qty) {
-    window.MOCK_DATA.inventory.push({
-      id: 'ITM' + Math.floor(Math.random() * 1000),
-      name, category: 'General', price: parseFloat(price),
-      stock: parseInt(qty), branch: 'Headquarters',
-      status: parseInt(qty) > 0 ? 'In Stock' : 'Out of Stock'
-    });
-    window.saveDB();
-    renderInventoryTable();
-  }
-}
+function updateItemQty(index) {}
+function transferItem(index) {}
+function createItem() {}
 
 // ——— Sales ———
 function renderRecentSales() {

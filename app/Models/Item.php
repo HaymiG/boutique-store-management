@@ -15,8 +15,8 @@ class Item extends Model
         $instance = new static();
         $result = $instance->db->query(
             "SELECT i.*, c.name as category_name FROM items i
-             LEFT JOIN categories c ON i.category_id = c.id
-             WHERE i.is_active = TRUE ORDER BY i.name ASC"
+                LEFT JOIN categories c ON i.category_id = c.id
+                WHERE i.is_active = TRUE ORDER BY i.name ASC"
         );
         $rows = [];
         while ($row = $result->fetch_assoc()) {
@@ -30,8 +30,8 @@ class Item extends Model
         $instance = new static();
         $result = $instance->db->query(
             "SELECT i.*, c.name as category_name FROM items i
-             LEFT JOIN categories c ON i.category_id = c.id
-             WHERE i.id = ? LIMIT 1",
+                LEFT JOIN categories c ON i.category_id = c.id
+                WHERE i.id = ? LIMIT 1",
             [$id]
         );
         $row = $result->fetch_assoc();
@@ -125,7 +125,7 @@ class Item extends Model
     {
         $result = $this->db->query(
             "SELECT s.*, b.name as branch_name FROM stock s
-             JOIN branches b ON s.branch_id = b.id WHERE s.item_id = ?",
+                JOIN branches b ON s.branch_id = b.id WHERE s.item_id = ?",
             [$this->id]
         );
         $rows = [];

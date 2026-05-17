@@ -153,7 +153,13 @@ function serveStaticFile($uri) {
     ];
     
     header('Content-Type: ' . ($mimeTypes[$ext] ?? 'application/octet-stream'));
-    header('Cache-Control: public, max-age=3600');
+    if (APP_DEBUG) {
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+    } else {
+        header('Cache-Control: public, max-age=3600');
+    }
     readfile($realPath);
     exit;
 }

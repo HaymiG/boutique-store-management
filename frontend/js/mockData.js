@@ -9,8 +9,8 @@ const __MOCK_DATA__ = {
     { id: 'ITM005', name: 'Velvet Blazer', category: 'Jackets', price: 145.00, stock: 0, branch: 'Downtown', status: 'Out of Stock' },
   ],
   branches: [
-    { id: 'BR001', name: 'Downtown Boutique', manager: 'Alice Smith', totalItems: 1450, totalSales: '$24,500' },
-    { id: 'BR002', name: 'Uptown Premium', manager: 'Bob Jones', totalItems: 890, totalSales: '$18,200' },
+    { id: 1, name: 'Downtown Boutique', manager: 'Alice Smith', totalItems: 1450, totalSales: '$24,500' },
+    { id: 2, name: 'Uptown Premium', manager: 'Bob Jones', totalItems: 890, totalSales: '$18,200' },
   ],
   recentSales: [
     { id: 'TRX-1029', date: '2026-04-10', items: '2', total: 374.99, seller: 'Sarah Connor', branch: 'Downtown' },

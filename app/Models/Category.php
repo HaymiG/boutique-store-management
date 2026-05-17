@@ -15,8 +15,8 @@ class Category extends Model
         $instance = new static();
         $result = $instance->db->query(
             "SELECT c.*, COUNT(i.id) as item_count
-             FROM categories c LEFT JOIN items i ON c.id = i.category_id AND i.is_active = TRUE
-             GROUP BY c.id ORDER BY c.name ASC"
+                FROM categories c LEFT JOIN items i ON c.id = i.category_id AND i.is_active = TRUE
+                GROUP BY c.id ORDER BY c.name ASC"
         );
         $rows = [];
         while ($row = $result->fetch_assoc()) {

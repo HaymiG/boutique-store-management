@@ -68,6 +68,22 @@ return function (Router $router) {
     $router->get('/api/password/verify-token', 'PasswordResetController@apiVerifyToken', 'api.password.verify');
 
     // ============================================
+    // API ROUTES - BRANCHES
+    // ============================================
+    $router->get('/api/branches', 'BranchController@index', 'api.branches.index');
+
+    // ============================================
+    // API ROUTES - INVENTORY
+    // ============================================
+    $router->get('/api/inventory',              'InventoryController@index',    'api.inventory.index');
+    $router->get('/api/inventory/low-stock',    'InventoryController@lowStock', 'api.inventory.low');
+    $router->get('/api/inventory/value',        'InventoryController@value',    'api.inventory.value');
+    $router->get('/api/inventory/history',      'InventoryController@history',  'api.inventory.history');
+    $router->get('/api/inventory/report',       'InventoryController@report',   'api.inventory.report');
+    $router->post('/api/inventory/adjust',      'InventoryController@adjust',   'api.inventory.adjust');
+    $router->post('/api/inventory/damage',      'InventoryController@damage',   'api.inventory.damage');
+
+    // ============================================
     // API ROUTES (Optional - JSON responses) - DISABLED
     // ============================================
     /*

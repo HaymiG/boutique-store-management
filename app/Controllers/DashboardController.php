@@ -24,13 +24,8 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // Check if user is authenticated
-        if (!$this->session->isAuthenticated()) {
-            header('Location: /login');
-            exit;
-        }
-
-        // Include dashboard page
+        // Just render the dashboard - let frontend handle auth via localStorage
+        // Frontend will check auth and redirect to login if needed
         include FRONTEND_PATH . '/pages/dashboard.html';
     }
 }
